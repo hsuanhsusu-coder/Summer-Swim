@@ -323,6 +323,7 @@
     <section class="panel" id="panel-admin">
       <div class="subtabs">
         <button class="subtab active" data-sub="bind" id="subtabBind">👨‍👩‍👧 名單與家長綁定</button>
+        <button class="subtab" data-sub="perm" id="subtabPerm">🛡️ 人員權限</button>
         <button class="subtab" data-sub="summary" id="subtabSummary">📊 出席彙總與匯出</button>
       </div>
 
@@ -353,11 +354,28 @@
         </div>
       </div>
 
+      <!-- 人員權限 -->
+      <div class="subpanel" id="sub-perm">
+        <div class="card">
+          <h2>🛡️ 人員權限（檢視者）</h2>
+          <p class="lead">這裡管理「只能看與匯出」的人員——師長、正/副會長、沒有小孩但需要看資料的人都可加在這裡。他們用自己的 Google 信箱登入後，會看到「出席彙總與匯出」，但不能修改名單或綁定。頭銜只是給你自己辨識用。<b>只有最高管理員能修改這份名單。</b></p>
+          <button class="btn btn-ghost btn-sm" id="seedViewerBtn" style="display:none;margin-bottom:12px">匯入預設檢視者</button>
+          <div class="roster-admin" id="viewerList"></div>
+          <div class="add-form">
+            <div class="fg"><label>Google 信箱</label><input id="newViewerEmail" class="wide" placeholder="someone@gmail.com"></div>
+            <div class="fg"><label>頭銜（辨識用）</label><input id="newViewerTitle" class="wide" placeholder="如：師長 / 正會長 / 副會長"></div>
+            <button class="btn btn-primary btn-sm" id="addViewerBtn">＋ 新增檢視者</button>
+          </div>
+          <div class="toast" id="permToast"></div>
+        </div>
+      </div>
+
       <!-- 彙總 -->
       <div class="subpanel" id="sub-summary">
         <div class="card">
           <h2>📊 整體彙總</h2>
           <div class="stat-row" id="statRow"></div>
+          <div id="unfilledBox"></div>
           <div class="export-row">
             <button class="btn btn-primary" id="exportBtn">⬇️ 匯出 CSV（明細）</button>
             <button class="btn btn-ghost" id="exportMonthBtn">⬇️ 個人月統計 CSV</button>
@@ -397,11 +415,13 @@
     messagingSenderId: "890910687436",
     appId: "1:890910687436:web:e9bd3c70654595db6d4269"
   };
-  /* ★ 管理員 Email（完整權限：可綁定、增減、匯出，可多個） */
+  /* ★ 最高管理員 Email（唯一可修改名單/綁定/權限的人，可多個）。這是安全根基，請勿隨意增加。 */
   const ADMIN_EMAILS = ["huichungw@gmail.com"];
-  /* ★ 副管理員 Email（唯讀：只能看彙總與匯出，不能改名單/綁定，可多個）
-     例如：["vice1@gmail.com", "vice2@gmail.com"] */
-  const VIEWER_EMAILS = ["vanessa2373.annie@gmail.com"];
+  /* 檢視者（師長/正副會長等，只能看與匯出）改為在「人員權限」介面動態管理，存於資料庫。
+     下面這份只是「第一次初始化」用的預設種子，匯入後即以資料庫為準。 */
+  const SEED_VIEWERS = [
+    { email:"vanessa2373.annie@gmail.com", title:"副會長" }
+  ];
   /* ═══════════════════════════════ */
 
   /* ★ 內建龍門隊員名單（依原始順序；之後增減用管理員介面，不動此處） */
@@ -453,9 +473,10 @@
   function venueOfKey(key){ const [date,sess]=key.split("_"); const p=date.split("-"); const mm=+p[1],d=+p[2]; if(sess==="pm")return "永運"; return (LONG_AM_DAYS[mm]||[]).includes(d)?"龍門":"永運"; }
   const venueClass=v=>v==="龍門"?"vl":"vy";
 
-  let currentUser=null, isAdmin=false, isViewer=false;
-  let allStudents=[];          // 管理員：全部
+  let currentUser=null, isAdmin=false, isViewer=false, myTitle="";
+  let allStudents=[];          // 管理員/檢視者：全部
   let myStudents=[];           // 家長：被指派的
+  let viewers=[];              // 檢視者名單（資料庫）
   let activeId=null, responses={};
 
   const $=id=>document.getElementById(id);
@@ -473,9 +494,12 @@
     currentUser=user;
     if(!user){ showLogin(); return; }
     isAdmin=ADMIN_EMAILS.map(lc).includes(lc(user.email));
-    isViewer=!isAdmin && VIEWER_EMAILS.map(lc).includes(lc(user.email));
+    await loadViewers();                                   // 先載入檢視者名單
+    const vrec=viewers.find(v=>lc(v.email)===lc(user.email));
+    isViewer=!isAdmin && !!vrec;
+    myTitle=vrec?vrec.title||"":"";
     showApp(user);
-    if(isAdmin || isViewer){ await loadAllStudents(); renderBindUI(); renderSummary(); }
+    if(isAdmin || isViewer){ await loadAllStudents(); renderBindUI(); renderViewersUI(); renderSummary(); }
     await loadMyStudents();
   });
   function showLogin(){ $("loginCard").style.display="block"; $("appShell").style.display="none"; $("authBar").style.display="none"; }
@@ -484,27 +508,34 @@
     $("whoText").innerHTML=`以 <small>${esc(user.email||"")}</small> 登入中`;
     const badge=$("adminBadge");
     if(isAdmin){ badge.style.display="inline-block"; badge.textContent="管理員"; }
-    else if(isViewer){ badge.style.display="inline-block"; badge.textContent="副管理員（唯讀）"; }
+    else if(isViewer){ badge.style.display="inline-block"; badge.textContent=(myTitle?myTitle+"・":"")+"檢視者"; }
     else { badge.style.display="none"; }
     $("tabAdmin").style.display=(isAdmin||isViewer)?"inline-block":"none";
-    if(isViewer){
-      // 副管理員：藏掉「名單與家長綁定」子分頁，只留彙總與匯出
-      $("subtabBind").style.display="none";
-      $("sub-bind").classList.remove("show");
-      $("subtabSummary").classList.add("active");
-      $("sub-summary").classList.add("show");
+    // 只有最高管理員看得到「名單與家長綁定」「人員權限」；檢視者只看彙總
+    $("subtabBind").style.display=isAdmin?"inline-block":"none";
+    $("subtabPerm").style.display=isAdmin?"inline-block":"none";
+    if(isViewer && !isAdmin){
+      $("sub-bind").classList.remove("show"); $("subtabBind").classList.remove("active");
+      $("sub-perm").classList.remove("show"); $("subtabPerm").classList.remove("active");
+      $("subtabSummary").classList.add("active"); $("sub-summary").classList.add("show");
     }
   }
   $("loginBtn").addEventListener("click", async ()=>{ const t=$("loginToast");
     try{ await signInWithPopup(auth,provider); }catch(e){ t.className="toast err"; t.textContent="登入未完成："+(e.code||e.message)+"。"; } });
   $("logoutBtn").addEventListener("click", ()=>signOut(auth));
 
-  /* ---------- 家長：載入被指派的學員 ---------- */
+  /* ---------- 家長：載入被指派的學員（查 信箱1 與 信箱2 兩個欄位） ---------- */
   async function loadMyStudents(){
     myStudents=[];
+    const myEmail=lc(currentUser.email);
     try{
-      const qs=await getDocs(query(collection(db,"students"), where("parentEmail","==",lc(currentUser.email))));
-      myStudents=qs.docs.map(d=>({id:d.id, ...d.data()})).filter(s=>s.active!==false);
+      const [q1,q2]=await Promise.all([
+        getDocs(query(collection(db,"students"), where("parentEmail","==",myEmail))),
+        getDocs(query(collection(db,"students"), where("parentEmail2","==",myEmail)))
+      ]);
+      const map={};
+      [...q1.docs, ...q2.docs].forEach(d=>{ map[d.id]={id:d.id, ...d.data()}; });
+      myStudents=Object.values(map).filter(s=>s.active!==false);
       myStudents.sort((a,b)=>(a.order||0)-(b.order||0));
     }catch(e){ myStudents=[]; }
     if(myStudents.length===0){
@@ -669,12 +700,65 @@
     allStudents.sort((a,b)=>(a.order||0)-(b.order||0));
   }
 
+  /* ---------- 檢視者名單（資料庫，僅最高管理員可改） ---------- */
+  async function loadViewers(){
+    viewers=[];
+    try{ const qs=await getDocs(collection(db,"viewers")); viewers=qs.docs.map(d=>({id:d.id,...d.data()})); }catch(e){ viewers=[]; }
+    viewers.sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
+  }
+  async function seedViewers(){
+    const t=$("permToast");
+    try{
+      for(const v of SEED_VIEWERS){
+        const em=lc(v.email); if(!em) continue;
+        await setDoc(doc(db,"viewers", em), { email:em, title:v.title||"", createdAt:Date.now() });
+      }
+      t.className="toast ok"; t.textContent="已匯入預設檢視者。";
+      await loadViewers(); renderViewersUI();
+    }catch(e){ t.className="toast err"; t.textContent="匯入失敗："+(e.code||e.message); }
+  }
+  async function addViewer(){
+    const email=lc($("newViewerEmail").value);
+    const title=($("newViewerTitle").value||"").trim();
+    const t=$("permToast");
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ t.className="toast err"; t.textContent="請輸入正確的 Google 信箱。"; return; }
+    if(ADMIN_EMAILS.map(lc).includes(email)){ t.className="toast err"; t.textContent="這已經是最高管理員，不需加入檢視者。"; return; }
+    try{
+      await setDoc(doc(db,"viewers", email), { email, title, createdAt:Date.now() });
+      $("newViewerEmail").value=$("newViewerTitle").value="";
+      t.className="toast ok"; t.textContent=`已新增檢視者：${email}${title?"（"+title+"）":""}`;
+      await loadViewers(); renderViewersUI();
+    }catch(e){ t.className="toast err"; t.textContent="新增失敗："+(e.code||e.message); }
+  }
+  async function removeViewer(email){
+    if(!confirm(`確定移除檢視者「${email}」嗎？移除後他將無法再看資料。`)) return;
+    const t=$("permToast");
+    try{
+      await deleteDoc(doc(db,"viewers", lc(email)));
+      t.className="toast ok"; t.textContent=`已移除檢視者：${email}`;
+      await loadViewers(); renderViewersUI();
+    }catch(e){ t.className="toast err"; t.textContent="移除失敗："+(e.code||e.message); }
+  }
+  function renderViewersUI(){
+    if(!isAdmin) return;
+    const seedBtn=$("seedViewerBtn");
+    if(seedBtn) seedBtn.style.display = (viewers.length===0 && SEED_VIEWERS.length>0) ? "inline-block" : "none";
+    const el=$("viewerList");
+    if(viewers.length===0){ el.innerHTML=`<div class="empty-state" style="padding:18px">目前沒有檢視者。可在下方新增（例如師長、正/副會長）。</div>`; return; }
+    el.innerHTML=viewers.map(v=>`
+      <div class="radmin-row" data-vid="${esc(v.email)}">
+        <span class="nm">${esc(v.title||"（未填頭銜）")}<small>${esc(v.email)}</small></span>
+        <span class="acts"><button class="iconbtn toggle" data-rmview="${esc(v.email)}">移除</button></span>
+      </div>`).join("");
+    el.querySelectorAll("[data-rmview]").forEach(b=> b.addEventListener("click",()=>removeViewer(b.dataset.rmview)));
+  }
+
   async function initRoster(){
     const t=$("initToast");
     try{
       for(const s of DEFAULT_ROSTER){
         const id="s"+pad(s.order);
-        await setDoc(doc(db,"students",id), { order:s.order, cls:s.cls, seat:s.seat, name:s.name, grade:s.grade, parentEmail:"", parentNote:"", active:true, responses:{}, comment:"" });
+        await setDoc(doc(db,"students",id), { order:s.order, cls:s.cls, seat:s.seat, name:s.name, grade:s.grade, parentEmail:"", parentEmail2:"", parentNote:"", active:true, responses:{}, comment:"" });
       }
       t.className="toast ok"; t.textContent="已匯入 33 位隊員名單，可開始綁定家長信箱。";
       await loadAllStudents(); renderBindUI(); renderSummary();
@@ -691,8 +775,9 @@
       <div class="radmin-row ${s.active===false?'off':''}" data-id="${s.id}">
         <span class="ord">${s.order}</span>
         <span class="nm">${esc(s.name)}<small>${esc(s.grade)} · ${s.cls}班 · ${s.seat}號</small></span>
-        <span class="bind"><input type="email" placeholder="家長 Google 信箱" value="${esc(s.parentEmail||"")}" data-bind="${s.id}"></span>
-        <span class="bind"><input type="text" placeholder="備註（如：金采儀媽，僅你看得到）" value="${esc(s.parentNote||"")}" data-note="${s.id}"></span>
+        <span class="bind"><input type="email" placeholder="家長信箱 1（如爸爸）" value="${esc(s.parentEmail||"")}" data-bind="${s.id}"></span>
+        <span class="bind"><input type="email" placeholder="家長信箱 2（如媽媽，可留空）" value="${esc(s.parentEmail2||"")}" data-bind2="${s.id}"></span>
+        <span class="bind"><input type="text" placeholder="備註（如：金采儀家，僅你看得到）" value="${esc(s.parentNote||"")}" data-note="${s.id}"></span>
         <span class="acts">
           <button class="iconbtn save" data-save="${s.id}">儲存</button>
           <button class="iconbtn toggle" data-toggle="${s.id}">${s.active===false?'啟用':'停用'}</button>
@@ -703,15 +788,16 @@
   }
 
   async function saveBind(id){
-    const input=document.querySelector(`[data-bind="${id}"]`);
-    const noteInput=document.querySelector(`[data-note="${id}"]`);
-    const email=lc(input.value);
-    const note=(noteInput.value||"").trim();
+    const email=lc(document.querySelector(`[data-bind="${id}"]`).value);
+    const email2=lc(document.querySelector(`[data-bind2="${id}"]`).value);
+    const note=(document.querySelector(`[data-note="${id}"]`).value||"").trim();
     const t=$("bindToast");
-    if(email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ t.className="toast err"; t.textContent="信箱格式怪怪的，請再確認。"; return; }
+    const re=/^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+    if(email && !re.test(email)){ t.className="toast err"; t.textContent="家長信箱 1 格式怪怪的，請再確認。"; return; }
+    if(email2 && !re.test(email2)){ t.className="toast err"; t.textContent="家長信箱 2 格式怪怪的，請再確認。"; return; }
     try{
-      await updateDoc(doc(db,"students",id), { parentEmail:email, parentNote:note });
-      const s=allStudents.find(x=>x.id===id); if(s){ s.parentEmail=email; s.parentNote=note; }
+      await updateDoc(doc(db,"students",id), { parentEmail:email, parentEmail2:email2, parentNote:note });
+      const s=allStudents.find(x=>x.id===id); if(s){ s.parentEmail=email; s.parentEmail2=email2; s.parentNote=note; }
       t.className="toast ok"; t.textContent=`已更新「${s?s.name:""}」的家長綁定。`;
     }catch(e){ t.className="toast err"; t.textContent="儲存失敗："+(e.code||e.message); }
   }
@@ -728,7 +814,7 @@
     const maxOrder=allStudents.reduce((m,s)=>Math.max(m,s.order||0),0);
     const id="s"+Date.now().toString(36);
     try{
-      await setDoc(doc(db,"students",id), { order:maxOrder+1, cls:cls||"", seat:seat||"", name, grade:grade||"", parentEmail:"", parentNote:"", active:true, responses:{}, comment:"" });
+      await setDoc(doc(db,"students",id), { order:maxOrder+1, cls:cls||"", seat:seat||"", name, grade:grade||"", parentEmail:"", parentEmail2:"", parentNote:"", active:true, responses:{}, comment:"" });
       $("newName").value=$("newSeat").value=$("newCls").value=$("newGrade").value="";
       t.className="toast ok"; t.textContent=`已新增「${name}」（順序 ${maxOrder+1}，加在名單最後）。`;
       await loadAllStudents(); renderBindUI(); renderSummary();
@@ -740,12 +826,28 @@
   function renderSummary(){ renderStats(); renderRoster(); renderDaily(); }
   function renderStats(){
     const list=activeAll();
-    const filled=list.filter(s=>s.responses&&Object.keys(s.responses).length>0).length;
+    const filledList=list.filter(s=>s.responses&&Object.keys(s.responses).length>0);
+    const unfilled=list.filter(s=>!(s.responses&&Object.keys(s.responses).length>0));
     let attend=0; list.forEach(s=>Object.values(s.responses||{}).forEach(v=>{ if(v==="yes")attend++; }));
     $("statRow").innerHTML=`
       <div class="stat"><div class="num">${list.length}</div><div class="lbl">在籍學員</div></div>
-      <div class="stat"><div class="num">${filled}</div><div class="lbl">已填寫人數</div></div>
+      <div class="stat"><div class="num">${filledList.length}</div><div class="lbl">已填寫</div></div>
+      <div class="stat" style="background:#fdeeea;border-color:#f4d2c8"><div class="num" style="color:#c0392b">${unfilled.length}</div><div class="lbl">尚未填寫</div></div>
       <div class="stat"><div class="num">${attend}</div><div class="lbl">出席場次總數</div></div>`;
+    // 未填名單提醒
+    const ue=$("unfilledBox");
+    if(ue){
+      if(list.length===0){ ue.innerHTML=""; }
+      else if(unfilled.length===0){ ue.innerHTML=`<div class="note" style="border-left-color:#0f9d8f;background:#e4f6f2">🎉 全部 ${list.length} 位都已填寫完成！</div>`; }
+      else{
+        ue.innerHTML=`<div class="note" style="border-left-color:#e0764f;background:#fdeeea">
+          ⏳ 還有 <b>${unfilled.length}</b> 位尚未填寫：${unfilled.map(s=>{
+            const em=[s.parentEmail,s.parentEmail2].filter(e=>e&&e.trim());
+            return `${esc(s.name)}${em.length?`（${esc(em.join("、"))}）`:`（未綁定家長）`}`;
+          }).join("、")}
+        </div>`;
+      }
+    }
   }
   function renderRoster(){
     const el=$("roster"); const list=activeAll();
@@ -753,7 +855,8 @@
     el.innerHTML=list.map(s=>{
       const t=tallyResponses(s.responses);
       const filled=s.responses&&Object.keys(s.responses).length>0;
-      const bind=s.parentEmail?esc(s.parentEmail):'<span style="color:#c47">未綁定家長</span>';
+      const emails=[s.parentEmail,s.parentEmail2].filter(e=>e&&e.trim());
+      const bind=emails.length?esc(emails.join("、")):'<span style="color:#c47">未綁定家長</span>';
       const note=s.parentNote?` <span style="color:var(--pool-deep);font-weight:700">（${esc(s.parentNote)}）</span>`:"";
       const cmt=s.comment?`<div class="cmt">💬 ${esc(s.comment)}</div>`:"";
       return `<div class="person">
@@ -794,16 +897,16 @@
   }
   function exportDetail(){
     const list=activeAll(); if(list.length===0){ alert("名單是空的。"); return; }
-    const rows=[["序號","姓名","座號","年級","家長信箱","家長備註","日期","星期","場次","地點","其他意見"]];
+    const rows=[["序號","姓名","座號","年級","家長信箱1","家長信箱2","家長備註","日期","星期","場次","地點","其他意見"]];
     list.forEach(s=>{ let first=true;
       Object.entries(s.responses||{}).forEach(([k,v])=>{ if(v!=="yes")return; const [date,sess]=k.split("_"); const dt=new Date(date+"T00:00:00");
-        rows.push([s.order,s.name,s.seat,s.grade,s.parentEmail||"",s.parentNote||"",date,WD[dt.getDay()],SESS_LABEL[sess],venueOfKey(k),first?(s.comment||""):""]); first=false; }); });
+        rows.push([s.order,s.name,s.seat,s.grade,s.parentEmail||"",s.parentEmail2||"",s.parentNote||"",date,WD[dt.getDay()],SESS_LABEL[sess],venueOfKey(k),first?(s.comment||""):""]); first=false; }); });
     download(`龍門暑訓出席_明細_${stamp()}.csv`,rows);
   }
   function exportMonthly(){
     const list=activeAll(); if(list.length===0){ alert("名單是空的。"); return; }
-    const rows=[["序號","姓名","座號","年級","家長信箱","家長備註","七月場次","八月場次","合計","龍門場次","永運場次"]];
-    list.forEach(s=>{ const t=tallyResponses(s.responses); rows.push([s.order,s.name,s.seat,s.grade,s.parentEmail||"",s.parentNote||"",t.jul,t.aug,t.total,t.long,t.yong]); });
+    const rows=[["序號","姓名","座號","年級","家長信箱1","家長信箱2","家長備註","七月場次","八月場次","合計","龍門場次","永運場次"]];
+    list.forEach(s=>{ const t=tallyResponses(s.responses); rows.push([s.order,s.name,s.seat,s.grade,s.parentEmail||"",s.parentEmail2||"",s.parentNote||"",t.jul,t.aug,t.total,t.long,t.yong]); });
     download(`龍門暑訓出席_個人月統計_${stamp()}.csv`,rows);
   }
   function exportSummary(){
@@ -834,6 +937,8 @@
   $("initBtn").addEventListener("click",initRoster);
   $("addStuBtn").addEventListener("click",addStudent);
   $("reloadRosterBtn").addEventListener("click",async()=>{ await loadAllStudents(); renderBindUI(); renderSummary(); });
+  $("addViewerBtn").addEventListener("click",addViewer);
+  $("seedViewerBtn").addEventListener("click",seedViewers);
   $("exportBtn").addEventListener("click",exportDetail);
   $("exportMonthBtn").addEventListener("click",exportMonthly);
   $("exportSumBtn").addEventListener("click",exportSummary);
