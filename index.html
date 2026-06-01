@@ -174,6 +174,9 @@
   .radmin-row .bind input{width:100%;font-family:inherit;font-size:.9rem;padding:8px 12px;border:1.5px solid var(--line);border-radius:9px;background:#fff}
   .radmin-row .bind input:focus{outline:none;border-color:var(--pool-bright);box-shadow:0 0 0 3px var(--pool-light)}
   .radmin-row .acts{display:flex;gap:6px}
+  .radmin-row .unlock-cell{display:flex;flex-direction:column;gap:3px}
+  .radmin-row .unlock-cell label{font-size:.74rem;font-weight:600;color:var(--ink-soft);display:flex;align-items:center;gap:4px;cursor:pointer}
+  .radmin-row .unlock-cell input{width:15px;height:15px}
   .iconbtn{font-family:inherit;cursor:pointer;border:1.5px solid var(--line);background:#fff;color:var(--ink-soft);border-radius:9px;padding:7px 11px;font-size:.82rem;font-weight:700;transition:.15s}
   .iconbtn.save:hover{border-color:var(--yes);color:var(--yes);background:var(--yes-soft)}
   .iconbtn.toggle:hover{border-color:var(--sun);color:#a8730f;background:#fff3da}
@@ -315,6 +318,7 @@
         <div class="card">
           <h2><span class="n">2</span>勾選會出席的場次</h2>
           <div class="who-now" id="whoNow"></div>
+          <div class="note" id="summerLockBanner" style="display:none;border-left-color:#e0764f;background:#fdeeea">🔒 暑期填寫已截止，目前無法修改。如需更動，請聯絡管理員 泳隊家長後援會。</div>
           <p class="lead">點一下每天的「晨」或「午」即標記會出席（綠勾），再點一次取消。每場下方標示訓練地點。每週日休息、8/31 開學不安排訓練。</p>
           <div class="mystats">
             <div class="mystat"><div class="num" id="msJul">0</div><div class="lbl">七月出席場次</div></div>
@@ -366,6 +370,13 @@
 
       <!-- 名單與綁定 -->
       <div class="subpanel show" id="sub-bind">
+        <div class="card">
+          <h2>🔓 暑期填寫開關</h2>
+          <p class="lead">控制家長能不能填寫／修改「暑期」出席。切到「已截止」後，家長就改不了（這是規則層級的真鎖定）；要放行個別家長，可在下方名單該位的「暑期特例」打勾。</p>
+          <button class="btn btn-ghost" id="summerLockBtn">🟢 暑期填寫：開放中</button>
+          <div class="hint" id="summerLockState" style="margin-top:8px"></div>
+        </div>
+
         <div class="card" id="initCard" style="display:none">
           <h2>📥 匯入隊員名單</h2>
           <p class="lead">系統內建龍門泳隊 33 位隊員名單（依原始順序）。第一次使用請按下方按鈕匯入；匯入後即可逐位綁定家長。</p>
@@ -449,6 +460,7 @@
         <div class="card">
           <h2><span class="n">2</span>勾選每週固定出席的場次</h2>
           <div class="who-now" id="semWhoNow"></div>
+          <div class="note" id="semLockBanner" style="display:none;border-left-color:#e0764f;background:#fdeeea">🔒 學期填寫已截止，目前無法修改。如需更動，請聯絡管理員 泳隊家長後援會。</div>
           <div class="note" id="semPeriodNote"></div>
           <p class="lead">這是「每週的常規」——勾選孩子<b>每週固定</b>會出席哪些晨訓/午訓，系統會套用到整個學期。臨時的請假或變動，請寫在下方備註。每格已標好訓練地點。</p>
           <div class="legend">
@@ -502,6 +514,12 @@
           <div id="tplRows"></div>
           <div style="margin-top:16px"><button class="btn btn-primary" id="semSaveSetup">儲存學期設定</button></div>
           <div class="toast" id="semSetupToast"></div>
+        </div>
+        <div class="card">
+          <h2>🔓 學期填寫開關</h2>
+          <p class="lead">控制家長能不能填寫／修改「學期」每週常規。切到「已截止」後家長就改不了（規則層級真鎖）；要放行個別家長，可到「暑期訓練 → 名單與家長綁定」該位的「學期特例」打勾。</p>
+          <button class="btn btn-ghost" id="semLockBtn">🟢 學期填寫：開放中</button>
+          <div class="hint" id="semLockState" style="margin-top:8px"></div>
         </div>
       </div>
 
@@ -625,6 +643,7 @@
   let semSetup=null;           // {name, start, end, week:{...}}  讀自 Firestore
   let semActiveId=null, semResponses={};   // 家長學期填寫：key = "1_am"(週一晨)
   const SEM_WD=["","週一","週二","週三","週四","週五","週六"];  // 1..6
+  let locks={summerOpen:true, semesterOpen:true};   // 填寫開關（讀自 config/locks）
 
   const $=id=>document.getElementById(id);
   const pad=n=>String(n).padStart(2,"0");
@@ -653,8 +672,10 @@
     const vrec=viewers.find(v=>lc(v.email)===lc(user.email));
     isViewer=!isAdmin && !!vrec;
     myTitle=vrec?vrec.title||"":"";
+    await loadLocks();                                     // 載入填寫開關
     showApp(user);
     if(isAdmin || isViewer){ await loadAllStudents(); renderBindUI(); renderViewersUI(); renderSummary(); }
+    if(isAdmin){ renderLockUI(); }
     await loadMyStudents();
   });
   function showLogin(){ $("loginCard").style.display="block"; $("appShell").style.display="none"; $("authBar").style.display="none"; }
@@ -715,6 +736,17 @@
     $("commentInput").value=s.comment||"";
     $("toast").className="toast"; $("toast").textContent="";
     repaintAll(); updateMyStats();
+    applySummerLock(s);
+  }
+  function applySummerLock(s){
+    const editable=canParentEdit(s,"summer");
+    const area=$("calendars");
+    document.querySelectorAll("#calendars .pill").forEach(p=>{ p.style.pointerEvents=editable?"":"none"; p.style.opacity=editable?"":".55"; });
+    $("submitBtn").disabled=!editable; $("submitBtn").style.opacity=editable?"":".5";
+    $("clearBtn").style.display=editable?"":"none";
+    $("commentInput").disabled=!editable;
+    const banner=$("summerLockBanner");
+    if(banner) banner.style.display=editable?"none":"block";
   }
   function switchStudent(id){
     if(id===activeId)return;
@@ -855,6 +887,35 @@
     allStudents.sort((a,b)=>(a.order||0)-(b.order||0));
   }
 
+  /* ---------- 填寫開關（config/locks，僅最高管理員可改） ---------- */
+  async function loadLocks(){
+    try{ const snap=await getDoc(doc(db,"config","locks"));
+      if(snap.exists()){ const d=snap.data(); locks={ summerOpen:d.summerOpen!==false, semesterOpen:d.semesterOpen!==false }; }
+      else { locks={summerOpen:true,semesterOpen:true}; }
+    }catch(e){ locks={summerOpen:true,semesterOpen:true}; }
+  }
+  async function setLock(which, open){
+    try{
+      await setDoc(doc(db,"config","locks"), { ...locks, [which]:open }, { merge:true });
+      locks[which]=open;
+      renderLockUI();
+    }catch(e){ alert("切換失敗："+(e.code||e.message)); }
+  }
+  function renderLockUI(){
+    const ss=$("summerLockBtn"), sl=$("semLockBtn");
+    if(ss){ ss.textContent=locks.summerOpen?"🟢 暑期填寫：開放中（點擊截止）":"🔴 暑期填寫：已截止（點擊開放）";
+      ss.className="btn "+(locks.summerOpen?"btn-ghost":"btn-primary"); }
+    const st=$("summerLockState"); if(st) st.textContent=locks.summerOpen?"目前開放家長填寫／修改":"目前已截止，家長無法修改（特例開放者除外）";
+    if(sl){ sl.textContent=locks.semesterOpen?"🟢 學期填寫：開放中（點擊截止）":"🔴 學期填寫：已截止（點擊開放）";
+      sl.className="btn "+(locks.semesterOpen?"btn-ghost":"btn-primary"); }
+    const st2=$("semLockState"); if(st2) st2.textContent=locks.semesterOpen?"目前開放家長填寫／修改":"目前已截止，家長無法修改（特例開放者除外）";
+  }
+  // 某生在某模式是否可被家長編輯
+  function canParentEdit(student, which){
+    if(which==="summer") return locks.summerOpen || student.unlockSummer===true;
+    return locks.semesterOpen || student.unlockSemester===true;
+  }
+
   /* ---------- 檢視者名單（資料庫，僅最高管理員可改） ---------- */
   async function loadViewers(){
     viewers=[];
@@ -913,7 +974,7 @@
     try{
       for(const s of DEFAULT_ROSTER){
         const id="s"+pad(s.order);
-        await setDoc(doc(db,"students",id), { order:s.order, cls:s.cls, seat:s.seat, name:s.name, grade:s.grade, parentEmail:"", parentEmail2:"", parentNote:"", active:true, responses:{}, comment:"" });
+        await setDoc(doc(db,"students",id), { order:s.order, cls:s.cls, seat:s.seat, name:s.name, grade:s.grade, parentEmail:"", parentEmail2:"", parentNote:"", unlockSummer:false, unlockSemester:false, active:true, responses:{}, comment:"" });
       }
       t.className="toast ok"; t.textContent="已匯入 33 位隊員名單，可開始綁定家長信箱。";
       await loadAllStudents(); renderBindUI(); renderSummary();
@@ -938,6 +999,10 @@
         <span class="bind"><input type="email" placeholder="家長信箱 1（如爸爸）" value="${esc(s.parentEmail||"")}" data-bind="${s.id}"></span>
         <span class="bind"><input type="email" placeholder="家長信箱 2（如媽媽，可留空）" value="${esc(s.parentEmail2||"")}" data-bind2="${s.id}"></span>
         <span class="bind"><input type="text" placeholder="備註（如：金采儀家，僅你看得到）" value="${esc(s.parentNote||"")}" data-note="${s.id}"></span>
+        <span class="unlock-cell">
+          <label title="即使暑期已截止，仍允許此家長修改"><input type="checkbox" data-unlock-su="${s.id}" ${s.unlockSummer===true?"checked":""}>暑期特例</label>
+          <label title="即使學期已截止，仍允許此家長修改"><input type="checkbox" data-unlock-se="${s.id}" ${s.unlockSemester===true?"checked":""}>學期特例</label>
+        </span>
         <span class="acts">
           <button class="iconbtn save" data-save="${s.id}">儲存</button>
           <button class="iconbtn toggle" data-toggle="${s.id}">${s.active===false?'啟用':'停用'}</button>
@@ -955,15 +1020,17 @@
     const grade=(document.querySelector(`[data-f-grade="${id}"]`).value||"").trim();
     const cls=(document.querySelector(`[data-f-cls="${id}"]`).value||"").trim();
     const seat=(document.querySelector(`[data-f-seat="${id}"]`).value||"").trim();
+    const unlockSummer=document.querySelector(`[data-unlock-su="${id}"]`).checked;
+    const unlockSemester=document.querySelector(`[data-unlock-se="${id}"]`).checked;
     const t=$("bindToast");
     const re=/^[^@\s]+@[^@\s]+\.[^@\s]+$/;
     if(!name){ t.className="toast err"; t.textContent="姓名不能空白。"; return; }
     if(email && !re.test(email)){ t.className="toast err"; t.textContent="家長信箱 1 格式怪怪的，請再確認。"; return; }
     if(email2 && !re.test(email2)){ t.className="toast err"; t.textContent="家長信箱 2 格式怪怪的，請再確認。"; return; }
     try{
-      await updateDoc(doc(db,"students",id), { name, grade, cls, seat, parentEmail:email, parentEmail2:email2, parentNote:note });
+      await updateDoc(doc(db,"students",id), { name, grade, cls, seat, parentEmail:email, parentEmail2:email2, parentNote:note, unlockSummer, unlockSemester });
       const s=allStudents.find(x=>x.id===id);
-      if(s){ s.name=name; s.grade=grade; s.cls=cls; s.seat=seat; s.parentEmail=email; s.parentEmail2=email2; s.parentNote=note; }
+      if(s){ s.name=name; s.grade=grade; s.cls=cls; s.seat=seat; s.parentEmail=email; s.parentEmail2=email2; s.parentNote=note; s.unlockSummer=unlockSummer; s.unlockSemester=unlockSemester; }
       t.className="toast ok"; t.textContent=`已更新「${name}」的資料與綁定。`;
       renderSummary();
     }catch(e){ t.className="toast err"; t.textContent="儲存失敗："+(e.code||e.message); }
@@ -981,7 +1048,7 @@
     const maxOrder=allStudents.reduce((m,s)=>Math.max(m,s.order||0),0);
     const id="s"+Date.now().toString(36);
     try{
-      await setDoc(doc(db,"students",id), { order:maxOrder+1, cls:cls||"", seat:seat||"", name, grade:grade||"", parentEmail:"", parentEmail2:"", parentNote:"", active:true, responses:{}, comment:"" });
+      await setDoc(doc(db,"students",id), { order:maxOrder+1, cls:cls||"", seat:seat||"", name, grade:grade||"", parentEmail:"", parentEmail2:"", parentNote:"", unlockSummer:false, unlockSemester:false, active:true, responses:{}, comment:"" });
       $("newName").value=$("newSeat").value=$("newCls").value=$("newGrade").value="";
       t.className="toast ok"; t.textContent=`已新增「${name}」（順序 ${maxOrder+1}，加在名單最後）。`;
       await loadAllStudents(); renderBindUI(); renderSummary();
@@ -1100,7 +1167,7 @@
   // 進入學期模式時刷新（依角色）
   async function refreshSemester(){
     await loadSemSetup();
-    if(isAdmin){ renderSemSetupUI(); }
+    if(isAdmin){ renderSemSetupUI(); renderLockUI(); }
     if(isAdmin||isViewer){ renderSemSummary(); }
     loadSemForParent();
     // 管理員/檢視者的學期子分頁可見性
@@ -1211,6 +1278,15 @@
     $("semComment").value=s.semComment||"";
     $("semToast").className="toast"; $("semToast").textContent="";
     semRepaint();
+    applySemLock(s);
+  }
+  function applySemLock(s){
+    const editable=canParentEdit(s,"semester");
+    document.querySelectorAll("#semWeek .wpill").forEach(p=>{ p.style.pointerEvents=editable?"":"none"; p.style.opacity=editable?"":".55"; });
+    $("semSubmitBtn").disabled=!editable; $("semSubmitBtn").style.opacity=editable?"":".5";
+    $("semAllYes").style.display=editable?"":"none"; $("semClear").style.display=editable?"":"none";
+    $("semComment").disabled=!editable;
+    const banner=$("semLockBanner"); if(banner) banner.style.display=editable?"none":"block";
   }
   function switchSemStudent(id){
     if(id===semActiveId)return;
@@ -1374,6 +1450,8 @@
   $("semClear").addEventListener("click",()=>semQuick("clear"));
   $("semExportBtn").addEventListener("click",semExportDetail);
   $("semExportWeekBtn").addEventListener("click",semExportWeekly);
+  $("summerLockBtn").addEventListener("click",()=>setLock("summerOpen", !locks.summerOpen));
+  $("semLockBtn").addEventListener("click",()=>setLock("semesterOpen", !locks.semesterOpen));
 
   buildCalendars();
 </script>
