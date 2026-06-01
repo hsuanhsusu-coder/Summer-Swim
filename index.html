@@ -214,7 +214,31 @@
 
   .export-row{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:8px}
   .note{font-size:.82rem;color:var(--ink-soft);background:var(--pool-mist);border-left:3px solid var(--pool);padding:11px 15px;border-radius:0 10px 10px 0;margin-top:6px}
+  .mode-switch{display:flex;gap:0;margin-bottom:18px;background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:5px;box-shadow:var(--shadow);max-width:380px}
+  .mode-btn{flex:1;font-family:inherit;font-size:.98rem;font-weight:700;cursor:pointer;border:none;background:transparent;color:var(--ink-soft);padding:11px 14px;border-radius:10px;transition:.18s}
+  .mode-btn.active{background:linear-gradient(135deg,var(--pool-deep),var(--pool));color:#fff}
   .subtabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+  /* 學期：週表 */
+  .weekgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:10px}
+  .weekgrid.admin-tpl{grid-template-columns:repeat(7,1fr)}
+  .wcol{background:var(--pool-mist);border:1px solid #e3f1f2;border-radius:12px;padding:10px 7px;display:flex;flex-direction:column;gap:7px}
+  .wcol.rest{background:#f1f4f5;border-style:dashed}
+  .wcol .wd-h{text-align:center;font-weight:900;color:var(--pool-deep);font-size:.92rem}
+  .wcol .rest-mini{text-align:center;color:#aab;font-size:.74rem;font-weight:700;padding:8px 0}
+  .wpill{font-family:inherit;cursor:pointer;border:none;border-radius:8px;padding:7px 4px;background:#e7eef0;color:var(--ink-soft);display:flex;flex-direction:column;align-items:center;gap:2px;transition:.13s;line-height:1.15}
+  .wpill:hover{filter:brightness(.97);transform:translateY(-1px)}
+  .wpill .wtop{font-size:.78rem;font-weight:900;display:flex;align-items:center;gap:3px}
+  .wpill .wven{font-size:.64rem;font-weight:700}
+  .wpill .wven.vl{color:var(--venue-long)} .wpill .wven.vy{color:var(--venue-yong)}
+  .wpill[data-on="1"]{background:var(--yes);color:#fff}
+  .wpill[data-on="1"] .wven{color:#eafff9 !important}
+  /* 學期模板設定列 */
+  .tpl-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 12px;border-radius:11px;background:var(--pool-mist);border:1px solid #e3f1f2;margin-bottom:7px}
+  .tpl-row .tpl-day{font-weight:900;color:var(--pool-deep);min-width:48px}
+  .tpl-seg{display:flex;align-items:center;gap:5px;background:#fff;border:1.5px solid var(--line);border-radius:9px;padding:5px 9px}
+  .tpl-seg label{font-size:.82rem;font-weight:700;color:var(--ink-soft)}
+  .tpl-seg input[type=text]{font-family:inherit;font-size:.85rem;padding:5px 8px;border:1.5px solid var(--line);border-radius:7px;width:80px}
+  .tpl-seg input[type=checkbox]{width:16px;height:16px}
   .subtab{font-family:inherit;font-size:.9rem;font-weight:700;cursor:pointer;border:1.5px solid var(--line);background:#fff;color:var(--ink-soft);padding:8px 16px;border-radius:10px;transition:.15s}
   .subtab.active{background:var(--pool);color:#fff;border-color:var(--pool)}
   .subpanel{display:none}.subpanel.show{display:block}
@@ -263,6 +287,11 @@
   </section>
 
   <div id="appShell">
+    <div class="mode-switch" id="modeSwitch">
+      <button class="mode-btn active" data-mode="summer" id="modeSummer">☀️ 暑期訓練</button>
+      <button class="mode-btn" data-mode="semester" id="modeSemester">📚 學期訓練</button>
+    </div>
+
     <div class="tabs">
       <button class="tab active" data-tab="fill" id="tabFill">✍️ 填寫意願</button>
       <button class="tab" data-tab="admin" id="tabAdmin">🔒 管理員專區</button>
@@ -402,16 +431,112 @@
         </div>
       </div>
     </section>
+
+    <!-- ===== 學期：填寫（家長） ===== -->
+    <section class="panel" id="panel-sem-fill">
+      <div id="semNoSetup" class="card" style="display:none">
+        <div class="empty-state"><div class="big">🗓️</div>學期訓練尚未開放，管理員設定好學期區間後即可填寫。</div>
+      </div>
+      <div id="semNoChild" class="card" style="display:none">
+        <div class="empty-state"><div class="big">🔑</div>你目前還沒有被指派任何學員。<br>請聯絡管理員 泳隊家長後援會完成綁定後，再回來填寫。</div>
+      </div>
+      <div id="semFillArea" style="display:none">
+        <div class="card">
+          <h2><span class="n">1</span>選擇學員</h2>
+          <p class="lead">點名字可切換填寫對象，切換前記得先按下方「儲存」。</p>
+          <div class="students" id="semStudents"></div>
+        </div>
+        <div class="card">
+          <h2><span class="n">2</span>勾選每週固定出席的場次</h2>
+          <div class="who-now" id="semWhoNow"></div>
+          <div class="note" id="semPeriodNote"></div>
+          <p class="lead">這是「每週的常規」——勾選孩子<b>每週固定</b>會出席哪些晨訓/午訓，系統會套用到整個學期。臨時的請假或變動，請寫在下方備註。每格已標好訓練地點。</p>
+          <div class="legend">
+            <span class="lab">說明：</span>
+            <span class="key"><span class="dot e"></span>未填</span>
+            <span class="key"><span class="dot y"></span>固定出席</span>
+            <span class="key"><span class="dot vl"></span>龍門</span>
+            <span class="key"><span class="dot vy"></span>永運</span>
+          </div>
+          <div class="quick">
+            <span class="qlab">快速：</span>
+            <button class="qbtn yes-q" id="semAllYes">全部固定出席</button>
+            <button class="qbtn clear" id="semClear">全部清空</button>
+          </div>
+          <div class="weekgrid" id="semWeek"></div>
+        </div>
+        <div class="card">
+          <h2><span class="n">3</span>其他意見</h2>
+          <div class="field"><label for="semComment">其他意見（選填）</label>
+            <textarea id="semComment" maxlength="500" placeholder="例如：每月第一週固定請假、某段期間出國等。"></textarea></div>
+        </div>
+        <div class="card">
+          <div class="submit-row">
+            <button class="btn btn-primary" id="semSubmitBtn">儲存這位學員</button>
+            <button class="btn btn-ghost" id="semPrintBtn">🖨️ 列印 / 存成 PDF</button>
+            <span class="hint">每位學員分開儲存；列印前請先儲存。</span>
+          </div>
+          <div class="toast" id="semToast"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 學期：管理員 ===== -->
+    <section class="panel" id="panel-sem-admin">
+      <div class="subtabs">
+        <button class="subtab active" data-ssub="setup" id="ssubSetup">⚙️ 學期設定</button>
+        <button class="subtab" data-ssub="summary" id="ssubSummary">📊 出席彙總與匯出</button>
+      </div>
+
+      <!-- 學期設定 -->
+      <div class="subpanel show" id="ssub-setup">
+        <div class="card">
+          <h2>⚙️ 學期設定</h2>
+          <p class="lead">設定學期名稱與起訖日，並調整每週各天的訓練場次與地點。預設為週一～週五在龍門、週六在永運、週日休息；你可以任意修改（含取消某天、改地點）。設定只有最高管理員能改。</p>
+          <div class="field" style="margin-bottom:12px"><label>學期名稱</label><input id="semName" type="text" placeholder="例如：2026 上學期"></div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px">
+            <div class="field" style="flex:1;min-width:150px"><label>開始日期</label><input id="semStart" type="date"></div>
+            <div class="field" style="flex:1;min-width:150px"><label>結束日期</label><input id="semEnd" type="date"></div>
+          </div>
+          <label style="display:block;font-weight:700;font-size:.92rem;margin-bottom:8px">每週訓練模板</label>
+          <div id="tplRows"></div>
+          <div style="margin-top:16px"><button class="btn btn-primary" id="semSaveSetup">儲存學期設定</button></div>
+          <div class="toast" id="semSetupToast"></div>
+        </div>
+      </div>
+
+      <!-- 學期彙總 -->
+      <div class="subpanel" id="ssub-summary">
+        <div class="card">
+          <h2>📊 學期彙總（每週常規）</h2>
+          <div class="stat-row" id="semStatRow"></div>
+          <div id="semUnfilledBox"></div>
+          <div class="export-row">
+            <button class="btn btn-primary" id="semExportBtn">⬇️ 匯出 CSV（明細）</button>
+            <button class="btn btn-ghost" id="semExportWeekBtn">⬇️ 每週彙總 CSV</button>
+          </div>
+          <div class="note">明細為「一列一個固定出席場次」（姓名／座號／年級／家長信箱／星期／場次／地點）；每週彙總列出每個場次有幾人固定出席。</div>
+        </div>
+        <div class="card">
+          <h2>👥 出席名單（依名單順序）</h2>
+          <div class="roster" id="semRoster"></div>
+        </div>
+        <div class="card">
+          <h2>📅 每週固定出席人數</h2>
+          <p class="lead">數字代表「每週固定會出席」的人數。</p>
+          <div class="daily" id="semWeekly"></div>
+        </div>
+      </div>
+    </section>
   </div>
 
-  <footer>龍門泳隊暑期訓練 · 採 Google 帳號登入；家長由教練綁定後填寫，名單與匯出僅管理員可見。</footer>
-</div>
+  <footer>龍門泳隊訓練出席系統 · 採 Google 帳號登入；家長由管理員綁定後填寫，名單與匯出僅管理員可見。</footer>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { getFirestore, doc, setDoc, updateDoc, getDocs, deleteDoc, collection, query, where, serverTimestamp }
+  import { getFirestore, doc, setDoc, updateDoc, getDoc, getDocs, deleteDoc, collection, query, where, serverTimestamp }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
   /* ════════ Firebase 設定 ════════ */
@@ -486,6 +611,20 @@
   let myStudents=[];           // 家長：被指派的
   let viewers=[];              // 檢視者名單（資料庫）
   let activeId=null, responses={};
+
+  /* ===== 學期版狀態 ===== */
+  let mode="summer";           // "summer" | "semester"
+  // 週模板：weekDays[dow] = { am:{on,venue}, pm:{on,venue} }，dow 1=週一..6=週六，0=週日
+  const DEFAULT_WEEK_TPL = (()=>{ const t={};
+    for(let i=0;i<=6;i++){
+      if(i===0){ t[i]={am:{on:false,venue:""},pm:{on:false,venue:""}}; }       // 週日休息
+      else if(i===6){ t[i]={am:{on:true,venue:"永運"},pm:{on:true,venue:"永運"}}; } // 週六永運
+      else { t[i]={am:{on:true,venue:"龍門"},pm:{on:true,venue:"龍門"}}; }       // 一~五龍門
+    }
+    return t; })();
+  let semSetup=null;           // {name, start, end, week:{...}}  讀自 Firestore
+  let semActiveId=null, semResponses={};   // 家長學期填寫：key = "1_am"(週一晨)
+  const SEM_WD=["","週一","週二","週三","週四","週五","週六"];  // 1..6
 
   const $=id=>document.getElementById(id);
   const pad=n=>String(n).padStart(2,"0");
@@ -948,16 +1087,273 @@
   }
   function stamp(){ const d=new Date(); return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}`; }
 
+  /* ════════════════ 學期版 ════════════════ */
+  function semVenueOf(dow,sess){
+    const wk=(semSetup&&semSetup.week)?semSetup.week:DEFAULT_WEEK_TPL;
+    const seg=wk[dow]&&wk[dow][sess]; return (seg&&seg.on)?(seg.venue||""):null; // null = 該場無訓練
+  }
+  // 載入學期設定
+  async function loadSemSetup(){
+    semSetup=null;
+    try{ const snap=await getDoc(doc(db,"config","semester")); if(snap.exists()) semSetup=snap.data(); }catch(e){}
+  }
+  // 進入學期模式時刷新（依角色）
+  async function refreshSemester(){
+    await loadSemSetup();
+    if(isAdmin){ renderSemSetupUI(); }
+    if(isAdmin||isViewer){ renderSemSummary(); }
+    loadSemForParent();
+    // 管理員/檢視者的學期子分頁可見性
+    $("ssubSetup").style.display=isAdmin?"inline-block":"none";
+    if(isViewer && !isAdmin){
+      $("ssub-setup").classList.remove("show"); $("ssubSetup").classList.remove("active");
+      $("ssubSummary").classList.add("active"); $("ssub-summary").classList.add("show");
+    }
+  }
+
+  /* ----- 管理員：學期設定 UI ----- */
+  function currentWeekTpl(){ return (semSetup&&semSetup.week)?semSetup.week:JSON.parse(JSON.stringify(DEFAULT_WEEK_TPL)); }
+  function renderSemSetupUI(){
+    if(!isAdmin) return;
+    $("semName").value=semSetup?.name||"";
+    $("semStart").value=semSetup?.start||"";
+    $("semEnd").value=semSetup?.end||"";
+    const wk=currentWeekTpl();
+    const rows=[1,2,3,4,5,6,0].map(dow=>{
+      const d=wk[dow]||{am:{on:false,venue:""},pm:{on:false,venue:""}};
+      function seg(sess,label){ const s=d[sess]||{on:false,venue:""};
+        return `<span class="tpl-seg">
+          <input type="checkbox" data-tpl-on="${dow}_${sess}" ${s.on?"checked":""}>
+          <label>${label}</label>
+          <input type="text" data-tpl-ven="${dow}_${sess}" placeholder="地點" value="${esc(s.venue||"")}" ${s.on?"":"disabled"} style="${s.on?"":"opacity:.4"}">
+        </span>`; }
+      return `<div class="tpl-row"><span class="tpl-day">${dow===0?"週日":SEM_WD[dow]}</span>${seg("am","晨訓")}${seg("pm","午訓")}</div>`;
+    }).join("");
+    $("tplRows").innerHTML=rows;
+    // checkbox 連動 enable 地點欄
+    $("tplRows").querySelectorAll("[data-tpl-on]").forEach(cb=> cb.addEventListener("change",()=>{
+      const ven=$("tplRows").querySelector(`[data-tpl-ven="${cb.dataset.tplOn}"]`);
+      ven.disabled=!cb.checked; ven.style.opacity=cb.checked?"1":".4";
+      if(cb.checked && !ven.value) ven.value="龍門";
+    }));
+  }
+  async function saveSemSetup(){
+    const t=$("semSetupToast");
+    const name=$("semName").value.trim(), start=$("semStart").value, end=$("semEnd").value;
+    if(!name){ t.className="toast err"; t.textContent="請填學期名稱。"; return; }
+    if(!start||!end){ t.className="toast err"; t.textContent="請填開始與結束日期。"; return; }
+    if(start>end){ t.className="toast err"; t.textContent="結束日期不能早於開始日期。"; return; }
+    const week={};
+    [0,1,2,3,4,5,6].forEach(dow=>{
+      week[dow]={};
+      ["am","pm"].forEach(sess=>{
+        const cb=$("tplRows").querySelector(`[data-tpl-on="${dow}_${sess}"]`);
+        const ven=$("tplRows").querySelector(`[data-tpl-ven="${dow}_${sess}"]`);
+        const on=cb?cb.checked:false;
+        week[dow][sess]={on, venue:on?((ven.value||"").trim()||"龍門"):""};
+      });
+    });
+    try{
+      await setDoc(doc(db,"config","semester"), { name, start, end, week, updatedAt:serverTimestamp() });
+      semSetup={name,start,end,week};
+      t.className="toast ok"; t.textContent="學期設定已儲存。家長現在可以填寫了。";
+      renderSemSummary();
+    }catch(e){ t.className="toast err"; t.textContent="儲存失敗："+(e.code||e.message); }
+  }
+
+  /* ----- 家長：學期週表填寫 ----- */
+  function semActiveStudent(){ return myStudents.find(s=>s.id===semActiveId); }
+  function loadSemForParent(){
+    // 沒設定學期
+    if(!semSetup){ $("semNoSetup").style.display="block"; $("semNoChild").style.display="none"; $("semFillArea").style.display="none"; return; }
+    $("semNoSetup").style.display="none";
+    if(!myStudents || myStudents.length===0){ $("semNoChild").style.display="block"; $("semFillArea").style.display="none"; return; }
+    $("semNoChild").style.display="none"; $("semFillArea").style.display="block";
+    if(!semActiveId || !myStudents.find(s=>s.id===semActiveId)) semActiveId=myStudents[0].id;
+    $("semPeriodNote").innerHTML=`📅 <b>${esc(semSetup.name)}</b>：${esc(semSetup.start)} ～ ${esc(semSetup.end)}`;
+    renderSemStudentChips(); buildSemWeek(); loadSemActiveIntoForm();
+  }
+  function renderSemStudentChips(){
+    $("semStudents").innerHTML=myStudents.map(s=>
+      `<button class="stud-chip ${s.id===semActiveId?'active':''}" data-sid="${s.id}" type="button">${esc(s.name)} <small>${studentMeta(s)}</small></button>`
+    ).join("");
+    $("semStudents").querySelectorAll(".stud-chip").forEach(b=> b.addEventListener("click",()=>switchSemStudent(b.dataset.sid)));
+  }
+  function buildSemWeek(){
+    const el=$("semWeek"); let html="";
+    for(let dow=1;dow<=6;dow++){
+      const am=semVenueOf(dow,"am"), pm=semVenueOf(dow,"pm");
+      if(am===null && pm===null){ html+=`<div class="wcol rest"><div class="wd-h">${SEM_WD[dow]}</div><div class="rest-mini">休息</div></div>`; continue; }
+      let pills="";
+      [["am","晨"],["pm","午"]].forEach(([sess,short])=>{
+        const v=semVenueOf(dow,sess);
+        if(v===null){ pills+=`<div class="rest-mini">—</div>`; }
+        else{ pills+=`<button class="wpill" data-skey="${dow}_${sess}" type="button"><span class="wtop"><span class="ic"></span>${short}</span><span class="wven ${venueClass(v)}">${esc(v)}</span></button>`; }
+      });
+      html+=`<div class="wcol"><div class="wd-h">${SEM_WD[dow]}</div>${pills}</div>`;
+    }
+    el.innerHTML=html;
+    el.querySelectorAll(".wpill").forEach(p=> p.addEventListener("click",()=>semToggle(p)));
+  }
+  function semPaint(p){ const on=semResponses[p.dataset.skey]==="yes"; const ic=p.querySelector(".ic");
+    if(on){ p.setAttribute("data-on","1"); ic.textContent="✓"; } else { p.removeAttribute("data-on"); ic.textContent=""; } }
+  function semToggle(p){ const k=p.dataset.skey; if(semResponses[k]==="yes")delete semResponses[k]; else semResponses[k]="yes"; semPaint(p); }
+  function semRepaint(){ document.querySelectorAll(".wpill").forEach(semPaint); }
+  function semQuick(action){
+    document.querySelectorAll(".wpill").forEach(p=>{ const k=p.dataset.skey;
+      if(action==="clear") delete semResponses[k]; else if(action==="yes") semResponses[k]="yes"; });
+    semRepaint();
+  }
+  function loadSemActiveIntoForm(){
+    const s=semActiveStudent(); if(!s)return;
+    semResponses=s.semResponses?{...s.semResponses}:{};
+    $("semWhoNow").innerHTML=`正在填寫：${esc(s.name)}<small>${studentMeta(s)}</small>`;
+    $("semComment").value=s.semComment||"";
+    $("semToast").className="toast"; $("semToast").textContent="";
+    semRepaint();
+  }
+  function switchSemStudent(id){
+    if(id===semActiveId)return;
+    const s=semActiveStudent(); if(s){ s.semResponses={...semResponses}; s.semComment=$("semComment").value.trim(); }
+    semActiveId=id; renderSemStudentChips(); loadSemActiveIntoForm();
+  }
+  async function semSubmit(){
+    const t=$("semToast"); const s=semActiveStudent(); if(!s)return;
+    s.semResponses={...semResponses}; s.semComment=$("semComment").value.trim();
+    if(Object.keys(semResponses).length===0){ t.className="toast err"; t.textContent="請至少勾選一個固定出席的場次再儲存。"; return; }
+    try{
+      await updateDoc(doc(db,"students",s.id), { semResponses:{...semResponses}, semComment:s.semComment, semUpdatedAt:serverTimestamp() });
+      t.className="toast ok"; t.textContent=`已儲存「${s.name}」的每週常規，共 ${Object.keys(semResponses).length} 個固定場次。`;
+    }catch(e){ t.className="toast err"; t.textContent="儲存失敗："+(e.code||e.message); }
+  }
+  function semPrint(){
+    const s=semActiveStudent(); if(!s)return;
+    const resp={...semResponses};
+    if(Object.keys(resp).length===0){ const t=$("semToast"); t.className="toast err"; t.textContent="目前沒有勾選任何場次，請先勾選再列印。"; return; }
+    let rows="";
+    for(let dow=1;dow<=6;dow++){
+      const am=semVenueOf(dow,"am"), pm=semVenueOf(dow,"pm");
+      if(am===null&&pm===null) continue;
+      function cell(sess){ const v=semVenueOf(dow,sess); if(v===null) return '<td class="no">—</td>';
+        return resp[dow+"_"+sess]==="yes" ? `<td class="mk"><b>✓ ${esc(v)}</b></td>` : '<td class="no">—</td>'; }
+      rows+=`<tr><td class="dn">${SEM_WD[dow]}</td>${cell("am")}${cell("pm")}</tr>`;
+    }
+    const w=window.open("","_blank"); if(!w){ const t=$("semToast"); t.className="toast err"; t.textContent="瀏覽器擋住列印視窗，請允許彈出視窗。"; return; }
+    w.document.write(`<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="UTF-8"><title>${esc(s.name)} 學期訓練每週常規</title>
+      <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;color:#0a2228;padding:24px;line-height:1.5}
+      h1{font-size:20px;color:#0a4f5e;margin-bottom:4px}.info{font-size:13px;color:#3c6068;margin-bottom:4px}
+      .sum{font-size:13px;margin:10px 0 16px;padding:9px 12px;background:#eef9fa;border-left:3px solid #13a3b8;border-radius:0 6px 6px 0}
+      table{width:100%;border-collapse:collapse;max-width:480px}th,td{border:1px solid #e0eef0;padding:9px;text-align:center;font-size:13px}
+      th{background:#f4fafb;color:#0a4f5e}td.dn{font-weight:700;background:#fafdfd}td.mk{background:#e4f6f2;color:#0a6b60;font-weight:700}td.no{color:#c2cdcf}
+      .pbtn{margin:16px 0;padding:10px 22px;font-size:14px;font-weight:700;background:#0a4f5e;color:#fff;border:none;border-radius:10px;cursor:pointer}
+      @media print{body{padding:0}.noprint{display:none}}</style></head><body>
+      <button class="pbtn noprint" onclick="window.print()">🖨️ 列印 / 另存為 PDF</button>
+      <h1>${esc(semSetup?semSetup.name:"學期訓練")} · 每週訓練常規</h1>
+      <div class="info">學員：${esc(s.name)}${studentMeta(s)?" ｜ "+studentMeta(s):""}</div>
+      <div class="info">學期期間：${esc(semSetup?semSetup.start:"")} ～ ${esc(semSetup?semSetup.end:"")}</div>
+      <div class="sum">下表為「每週固定出席」的常規，整學期每週適用。實際特例請見備註。</div>
+      <table><thead><tr><th>星期</th><th>晨訓</th><th>午訓</th></tr></thead><tbody>${rows}</tbody></table>
+      ${s.semComment?`<div class="sum" style="margin-top:14px">備註：${esc(s.semComment)}</div>`:""}
+      <script>window.onload=function(){setTimeout(function(){window.print();},400);};<\/script></body></html>`);
+    w.document.close();
+  }
+
+  /* ----- 管理員：學期彙總 ----- */
+  function semActiveAll(){ return allStudents.filter(s=>s.active!==false); }
+  function semTally(resp){ return Object.values(resp||{}).filter(v=>v==="yes").length; }
+  function renderSemSummary(){
+    const list=semActiveAll();
+    const filled=list.filter(s=>s.semResponses&&Object.keys(s.semResponses).length>0);
+    let slots=0; list.forEach(s=>{ slots+=semTally(s.semResponses); });
+    $("semStatRow").innerHTML=`
+      <div class="stat"><div class="num">${list.length}</div><div class="lbl">在籍學員</div></div>
+      <div class="stat"><div class="num">${filled.length}</div><div class="lbl">已填學期常規</div></div>
+      <div class="stat" style="background:#fdeeea;border-color:#f4d2c8"><div class="num" style="color:#c0392b">${list.length-filled.length}</div><div class="lbl">尚未填寫</div></div>
+      <div class="stat"><div class="num">${slots}</div><div class="lbl">固定出席場次總數</div></div>`;
+    const unfilled=list.filter(s=>!(s.semResponses&&Object.keys(s.semResponses).length>0));
+    const ub=$("semUnfilledBox");
+    if(list.length===0){ ub.innerHTML=""; }
+    else if(unfilled.length===0){ ub.innerHTML=`<div class="note" style="border-left-color:#0f9d8f;background:#e4f6f2">🎉 全部都填好學期常規了！</div>`; }
+    else{ ub.innerHTML=`<div class="note" style="border-left-color:#e0764f;background:#fdeeea">⏳ 還有 <b>${unfilled.length}</b> 位尚未填：${unfilled.map(s=>esc(s.name)).join("、")}</div>`; }
+    // 名單
+    const rel=$("semRoster");
+    if(list.length===0){ rel.innerHTML=`<div class="empty-state"><div class="big">🏊</div>名單是空的，請先在「暑期訓練 → 名單與家長綁定」匯入名單。</div>`; }
+    else{
+      rel.innerHTML=list.map(s=>{
+        const n=semTally(s.semResponses); const filledY=s.semResponses&&Object.keys(s.semResponses).length>0;
+        const cmt=s.semComment?`<div class="cmt">💬 ${esc(s.semComment)}</div>`:"";
+        return `<div class="person"><div class="avatar">${s.order}</div>
+          <div class="info"><div class="nm">${esc(s.name)} <small style="font-weight:500;color:var(--ink-soft)">${studentMeta(s)}</small></div>
+            <div class="tm">${filledY?`每週固定 ${n} 場`:"<span style='color:#c47'>尚未填寫</span>"}</div></div>
+          ${cmt}</div>`;
+      }).join("");
+    }
+    // 每週人數表
+    const wel=$("semWeekly");
+    if(!semSetup){ wel.innerHTML=`<div class="empty-state">尚未設定學期</div>`; }
+    else{
+      const tally={}; list.forEach(s=>Object.entries(s.semResponses||{}).forEach(([k,v])=>{ if(v==="yes")tally[k]=(tally[k]||0)+1; }));
+      let html=`<table><thead><tr><th class="d">星期</th><th>晨訓 🌅</th><th>午訓 🌇</th></tr></thead><tbody>`;
+      for(let dow=1;dow<=6;dow++){
+        const am=semVenueOf(dow,"am"), pm=semVenueOf(dow,"pm");
+        if(am===null&&pm===null) continue;
+        function cell(sess){ const v=semVenueOf(dow,sess); if(v===null) return `<td>—</td>`;
+          const c=tally[dow+"_"+sess]||0; return `<td><span class="mini ${c?'has':'zero'}">${c}</span><span class="vbadge ${venueClass(v)}">${esc(v)}</span></td>`; }
+        html+=`<tr><td class="d">${SEM_WD[dow]}</td>${cell("am")}${cell("pm")}</tr>`;
+      }
+      html+=`</tbody></table>`; wel.innerHTML=html;
+    }
+  }
+  function semExportDetail(){
+    const list=semActiveAll(); if(list.length===0){ alert("名單是空的。"); return; }
+    const rows=[["序號","姓名","座號","年級","家長信箱1","家長信箱2","星期","場次","地點","備註"]];
+    list.forEach(s=>{ let first=true;
+      Object.keys(s.semResponses||{}).forEach(k=>{ if(s.semResponses[k]!=="yes")return;
+        const [dow,sess]=k.split("_"); const v=semVenueOf(+dow,sess)||"";
+        rows.push([s.order,s.name,s.seat,s.grade,s.parentEmail||"",s.parentEmail2||"",SEM_WD[+dow],SESS_LABEL[sess],v,first?(s.semComment||""):""]); first=false; }); });
+    download(`龍門學期常規_明細_${stamp()}.csv`,rows);
+  }
+  function semExportWeekly(){
+    const list=semActiveAll(); if(list.length===0){ alert("名單是空的。"); return; }
+    if(!semSetup){ alert("尚未設定學期。"); return; }
+    const tally={}; list.forEach(s=>Object.entries(s.semResponses||{}).forEach(([k,v])=>{ if(v==="yes")tally[k]=(tally[k]||0)+1; }));
+    const rows=[["星期","場次","地點","固定出席人數"]];
+    for(let dow=1;dow<=6;dow++){ ["am","pm"].forEach(sess=>{ const v=semVenueOf(dow,sess); if(v===null)return;
+      rows.push([SEM_WD[dow],SESS_LABEL[sess],v,tally[dow+"_"+sess]||0]); }); }
+    download(`龍門學期常規_每週彙總_${stamp()}.csv`,rows);
+  }
+
   /* ---------- 綁定事件 ---------- */
+  // 目前在哪個分頁（fill / admin），切換模式時沿用
+  let curTab="fill";
+  function showPanels(){
+    // 先全部隱藏
+    ["panel-fill","panel-admin","panel-sem-fill","panel-sem-admin"].forEach(id=>{ const e=$(id); if(e)e.classList.remove("show"); });
+    if(mode==="summer"){ $("panel-"+curTab).classList.add("show"); }
+    else { $("panel-sem-"+curTab).classList.add("show"); }
+  }
+  document.querySelectorAll(".mode-btn").forEach(b=> b.addEventListener("click",()=>{
+    document.querySelectorAll(".mode-btn").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active"); mode=b.dataset.mode;
+    showPanels();
+    if(mode==="semester"){ refreshSemester(); }
+  }));
   document.querySelectorAll(".tab").forEach(t=> t.addEventListener("click",()=>{
     document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
-    document.querySelectorAll(".panel").forEach(x=>x.classList.remove("show"));
-    t.classList.add("active"); $("panel-"+t.dataset.tab).classList.add("show");
+    t.classList.add("active"); curTab=t.dataset.tab;
+    showPanels();
   }));
-  document.querySelectorAll(".subtab").forEach(t=> t.addEventListener("click",()=>{
-    document.querySelectorAll(".subtab").forEach(x=>x.classList.remove("active"));
-    document.querySelectorAll(".subpanel").forEach(x=>x.classList.remove("show"));
+  // 暑期管理員子分頁
+  document.querySelectorAll('#panel-admin .subtab').forEach(t=> t.addEventListener("click",()=>{
+    document.querySelectorAll('#panel-admin .subtab').forEach(x=>x.classList.remove("active"));
+    document.querySelectorAll('#panel-admin .subpanel').forEach(x=>x.classList.remove("show"));
     t.classList.add("active"); $("sub-"+t.dataset.sub).classList.add("show");
+  }));
+  // 學期管理員子分頁
+  document.querySelectorAll('#panel-sem-admin .subtab').forEach(t=> t.addEventListener("click",()=>{
+    document.querySelectorAll('#panel-sem-admin .subtab').forEach(x=>x.classList.remove("active"));
+    document.querySelectorAll('#panel-sem-admin .subpanel').forEach(x=>x.classList.remove("show"));
+    t.classList.add("active"); $("ssub-"+t.dataset.ssub).classList.add("show");
   }));
   $("clearBtn").addEventListener("click",()=>quick("clear"));
   $("submitBtn").addEventListener("click",submit);
@@ -970,6 +1366,14 @@
   $("exportBtn").addEventListener("click",exportDetail);
   $("exportMonthBtn").addEventListener("click",exportMonthly);
   $("exportSumBtn").addEventListener("click",exportSummary);
+  // 學期事件
+  $("semSaveSetup").addEventListener("click",saveSemSetup);
+  $("semSubmitBtn").addEventListener("click",semSubmit);
+  $("semPrintBtn").addEventListener("click",semPrint);
+  $("semAllYes").addEventListener("click",()=>semQuick("yes"));
+  $("semClear").addEventListener("click",()=>semQuick("clear"));
+  $("semExportBtn").addEventListener("click",semExportDetail);
+  $("semExportWeekBtn").addEventListener("click",semExportWeekly);
 
   buildCalendars();
 </script>
