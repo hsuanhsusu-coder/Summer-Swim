@@ -591,7 +591,7 @@
     try{
       for(const s of DEFAULT_ROSTER){
         const id="s"+pad(s.order);
-        await setDoc(doc(db,"students",id), { order:s.order, cls:s.cls, seat:s.seat, name:s.name, grade:s.grade, parentEmail:"", active:true, responses:{}, comment:"" });
+        await setDoc(doc(db,"students",id), { order:s.order, cls:s.cls, seat:s.seat, name:s.name, grade:s.grade, parentEmail:"", parentNote:"", active:true, responses:{}, comment:"" });
       }
       t.className="toast ok"; t.textContent="已匯入 33 位隊員名單，可開始綁定家長信箱。";
       await loadAllStudents(); renderBindUI(); renderSummary();
@@ -608,6 +608,7 @@
         <span class="ord">${s.order}</span>
         <span class="nm">${esc(s.name)}<small>${esc(s.grade)} · ${s.cls}班 · ${s.seat}號</small></span>
         <span class="bind"><input type="email" placeholder="家長 Google 信箱" value="${esc(s.parentEmail||"")}" data-bind="${s.id}"></span>
+        <span class="bind"><input type="text" placeholder="備註（如：金采儀媽，僅你看得到）" value="${esc(s.parentNote||"")}" data-note="${s.id}"></span>
         <span class="acts">
           <button class="iconbtn save" data-save="${s.id}">儲存</button>
           <button class="iconbtn toggle" data-toggle="${s.id}">${s.active===false?'啟用':'停用'}</button>
@@ -619,12 +620,14 @@
 
   async function saveBind(id){
     const input=document.querySelector(`[data-bind="${id}"]`);
+    const noteInput=document.querySelector(`[data-note="${id}"]`);
     const email=lc(input.value);
+    const note=(noteInput.value||"").trim();
     const t=$("bindToast");
     if(email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ t.className="toast err"; t.textContent="信箱格式怪怪的，請再確認。"; return; }
     try{
-      await updateDoc(doc(db,"students",id), { parentEmail:email });
-      const s=allStudents.find(x=>x.id===id); if(s)s.parentEmail=email;
+      await updateDoc(doc(db,"students",id), { parentEmail:email, parentNote:note });
+      const s=allStudents.find(x=>x.id===id); if(s){ s.parentEmail=email; s.parentNote=note; }
       t.className="toast ok"; t.textContent=`已更新「${s?s.name:""}」的家長綁定。`;
     }catch(e){ t.className="toast err"; t.textContent="儲存失敗："+(e.code||e.message); }
   }
@@ -641,7 +644,7 @@
     const maxOrder=allStudents.reduce((m,s)=>Math.max(m,s.order||0),0);
     const id="s"+Date.now().toString(36);
     try{
-      await setDoc(doc(db,"students",id), { order:maxOrder+1, cls:cls||"", seat:seat||"", name, grade:grade||"", parentEmail:"", active:true, responses:{}, comment:"" });
+      await setDoc(doc(db,"students",id), { order:maxOrder+1, cls:cls||"", seat:seat||"", name, grade:grade||"", parentEmail:"", parentNote:"", active:true, responses:{}, comment:"" });
       $("newName").value=$("newSeat").value=$("newCls").value=$("newGrade").value="";
       t.className="toast ok"; t.textContent=`已新增「${name}」（順序 ${maxOrder+1}，加在名單最後）。`;
       await loadAllStudents(); renderBindUI(); renderSummary();
@@ -667,11 +670,12 @@
       const t=tallyResponses(s.responses);
       const filled=s.responses&&Object.keys(s.responses).length>0;
       const bind=s.parentEmail?esc(s.parentEmail):'<span style="color:#c47">未綁定家長</span>';
+      const note=s.parentNote?` <span style="color:var(--pool-deep);font-weight:700">（${esc(s.parentNote)}）</span>`:"";
       const cmt=s.comment?`<div class="cmt">💬 ${esc(s.comment)}</div>`:"";
       return `<div class="person">
         <div class="avatar">${s.order}</div>
         <div class="info"><div class="nm">${esc(s.name)} <small style="font-weight:500;color:var(--ink-soft)">${esc(s.grade)}·${s.seat}號</small></div>
-          <div class="tm">家長：${bind}${filled?"":" · <span style='color:#c47'>尚未填寫</span>"}</div></div>
+          <div class="tm">家長：${bind}${note}${filled?"":" · <span style='color:#c47'>尚未填寫</span>"}</div></div>
         <div class="tally"><span class="tag jul">七月 ${t.jul}</span><span class="tag aug">八月 ${t.aug}</span><span class="tag vl">龍門 ${t.long}</span><span class="tag vy">永運 ${t.yong}</span></div>
         ${cmt}</div>`;
     }).join("");
@@ -706,16 +710,16 @@
   }
   function exportDetail(){
     const list=activeAll(); if(list.length===0){ alert("名單是空的。"); return; }
-    const rows=[["序號","姓名","座號","年級","家長信箱","日期","星期","場次","地點","其他意見"]];
+    const rows=[["序號","姓名","座號","年級","家長信箱","家長備註","日期","星期","場次","地點","其他意見"]];
     list.forEach(s=>{ let first=true;
       Object.entries(s.responses||{}).forEach(([k,v])=>{ if(v!=="yes")return; const [date,sess]=k.split("_"); const dt=new Date(date+"T00:00:00");
-        rows.push([s.order,s.name,s.seat,s.grade,s.parentEmail||"",date,WD[dt.getDay()],SESS_LABEL[sess],venueOfKey(k),first?(s.comment||""):""]); first=false; }); });
+        rows.push([s.order,s.name,s.seat,s.grade,s.parentEmail||"",s.parentNote||"",date,WD[dt.getDay()],SESS_LABEL[sess],venueOfKey(k),first?(s.comment||""):""]); first=false; }); });
     download(`龍門暑訓出席_明細_${stamp()}.csv`,rows);
   }
   function exportMonthly(){
     const list=activeAll(); if(list.length===0){ alert("名單是空的。"); return; }
-    const rows=[["序號","姓名","座號","年級","家長信箱","七月場次","八月場次","合計","龍門場次","永運場次"]];
-    list.forEach(s=>{ const t=tallyResponses(s.responses); rows.push([s.order,s.name,s.seat,s.grade,s.parentEmail||"",t.jul,t.aug,t.total,t.long,t.yong]); });
+    const rows=[["序號","姓名","座號","年級","家長信箱","家長備註","七月場次","八月場次","合計","龍門場次","永運場次"]];
+    list.forEach(s=>{ const t=tallyResponses(s.responses); rows.push([s.order,s.name,s.seat,s.grade,s.parentEmail||"",s.parentNote||"",t.jul,t.aug,t.total,t.long,t.yong]); });
     download(`龍門暑訓出席_個人月統計_${stamp()}.csv`,rows);
   }
   function exportSummary(){
