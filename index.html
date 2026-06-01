@@ -38,7 +38,6 @@
   .meta{margin-top:18px;display:flex;flex-wrap:wrap;gap:8px}
   .chip{font-size:.82rem;font-weight:500;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);color:#fff;padding:5px 13px;border-radius:999px;backdrop-filter:blur(4px)}
 
-  /* 帳號列 */
   .authbar{display:none;align-items:center;gap:12px;flex-wrap:wrap;margin:18px 2px 0;font-size:.9rem;color:var(--ink-soft)}
   .authbar .who{font-weight:700;color:var(--pool-deep)}
   .authbar .who small{font-weight:500;color:var(--ink-soft)}
@@ -46,7 +45,6 @@
   .linkbtn{margin-left:auto;font-family:inherit;font-size:.85rem;font-weight:700;cursor:pointer;border:1.5px solid var(--line);background:#fff;color:var(--ink-soft);padding:7px 15px;border-radius:999px;transition:.15s}
   .linkbtn:hover{border-color:var(--coral);color:var(--coral)}
 
-  /* 登入畫面 */
   .login-card{display:none;background:#fff;border-radius:22px;box-shadow:var(--shadow);border:1px solid #eaf5f6;
     padding:clamp(34px,6vw,56px) clamp(22px,5vw,40px);margin-top:22px;text-align:center}
   .login-card .ic{font-size:3rem;margin-bottom:10px}
@@ -56,7 +54,7 @@
     background:#fff;color:#3c4043;border:1.5px solid #dadce0;border-radius:13px;padding:13px 26px;transition:.18s}
   .gbtn:hover{box-shadow:0 4px 14px rgba(60,64,67,.18);border-color:#cdd1d6}
   .gbtn svg{width:20px;height:20px}
-  .login-card .small{font-size:.82rem;color:var(--ink-soft);margin-top:18px;max-width:40ch}
+  .login-card .small{font-size:.82rem;color:var(--ink-soft);margin-top:18px;max-width:40ch;margin-left:auto;margin-right:auto}
 
   .tabs{display:flex;gap:8px;margin:26px 0 18px;flex-wrap:wrap}
   .tab{font-family:inherit;font-size:.96rem;font-weight:700;cursor:pointer;border:1.5px solid var(--line);background:#fff;color:var(--ink-soft);padding:10px 20px;border-radius:999px;transition:.18s}
@@ -73,6 +71,20 @@
   .card h2{font-family:"Fraunces",serif;font-weight:600;font-size:1.4rem;color:var(--pool-deep);margin-bottom:4px;display:flex;align-items:center;gap:9px}
   .card h2 .n{font-size:.85rem;font-family:"Noto Sans TC";font-weight:900;color:#fff;background:var(--pool);width:26px;height:26px;border-radius:50%;display:grid;place-items:center;flex:none}
   .card p.lead{color:var(--ink-soft);font-size:.94rem;margin-bottom:18px}
+
+  /* 學員選擇列 */
+  .students{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:6px}
+  .stud-chip{display:inline-flex;align-items:center;gap:8px;font-family:inherit;font-size:.92rem;font-weight:700;cursor:pointer;
+    border:1.5px solid var(--line);background:#fff;color:var(--ink-soft);padding:9px 16px;border-radius:999px;transition:.15s}
+  .stud-chip:hover{border-color:var(--pool-bright);color:var(--pool-deep)}
+  .stud-chip.active{background:var(--pool);color:#fff;border-color:var(--pool)}
+  .stud-chip.add{border-style:dashed;color:var(--pool-deep)}
+  .stud-chip.add:hover{background:var(--pool-mist)}
+  .stud-chip .x{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,.3);font-size:.7rem;line-height:1}
+  .stud-chip.active .x:hover{background:rgba(255,255,255,.55)}
+  .stud-chip:not(.active) .x{background:#e7eef0}
+  .stud-chip:not(.active) .x:hover{background:var(--no-soft);color:var(--no)}
+  .stud-hint{font-size:.84rem;color:var(--ink-soft);margin-top:8px}
 
   .field{margin-bottom:4px}
   .field label{display:block;font-weight:700;font-size:.92rem;margin-bottom:7px;color:var(--ink)}
@@ -181,22 +193,20 @@
     <div class="meta">
       <span class="chip">📅 7月 &amp; 8月（每週日休息）</span>
       <span class="chip">🏊 晨訓 · 午訓</span>
-      <span class="chip">🔐 Google 帳號登入</span>
+      <span class="chip">👨‍👩‍👧 一個帳號可填多位學員</span>
     </div>
   </header>
 
-  <!-- 帳號列（登入後顯示） -->
   <div class="authbar" id="authBar">
     <span class="who" id="whoText"></span>
     <span class="badge-admin" id="adminBadge" style="display:none">管理員</span>
     <button class="linkbtn" id="logoutBtn">登出</button>
   </div>
 
-  <!-- 登入畫面（未登入顯示） -->
   <section class="login-card" id="loginCard">
     <div class="ic">🏊</div>
     <h2>請先登入</h2>
-    <p>請用你的 Google 帳號登入後填寫出席意願。每個帳號的填寫資料只有你自己與管理員看得到。</p>
+    <p>請用你的 Google 帳號登入後填寫出席意願。一個帳號可以新增多位學員（例如家中兩個小孩），各自獨立填寫。</p>
     <button class="gbtn" id="loginBtn">
       <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
       使用 Google 登入
@@ -205,18 +215,23 @@
     <div class="small" id="loginSmall"></div>
   </section>
 
-  <!-- 主畫面（登入後顯示） -->
   <div id="appShell">
     <div class="tabs">
       <button class="tab active" data-tab="fill" id="tabFill">✍️ 填寫意願</button>
       <button class="tab" data-tab="admin" id="tabAdmin">🔒 管理員專區</button>
     </div>
 
-    <!-- 填寫面板 -->
     <section class="panel show" id="panel-fill">
       <div class="card">
-        <h2><span class="n">1</span>填寫人資訊</h2>
-        <p class="lead">系統已帶入你的帳號名稱，若實際學員姓名不同請直接修改。再次送出會更新先前的填寫。</p>
+        <h2><span class="n">1</span>選擇學員</h2>
+        <p class="lead">這個帳號底下的學員都列在這裡。點名字可切換填寫對象，按「＋ 新增學員」可加入更多人（例如家中第二個小孩）。</p>
+        <div class="students" id="students"></div>
+        <div class="stud-hint" id="studHint"></div>
+      </div>
+
+      <div class="card">
+        <h2><span class="n">2</span>學員姓名</h2>
+        <p class="lead">目前正在填寫的學員姓名。修改後送出即會更新。</p>
         <div class="field">
           <label for="nameInput">學員姓名</label>
           <input id="nameInput" type="text" placeholder="例如：陳小魚" maxlength="40" autocomplete="off">
@@ -224,7 +239,7 @@
       </div>
 
       <div class="card">
-        <h2><span class="n">2</span>勾選出席意願</h2>
+        <h2><span class="n">3</span>勾選出席意願</h2>
         <p class="lead">點一下每天的「晨」（晨訓）或「午」（午訓）即可切換：未填 → 參加 → 不參加。每週日為休息日，不安排訓練。</p>
         <div class="legend">
           <span class="lab">狀態：</span>
@@ -241,7 +256,7 @@
       </div>
 
       <div class="card">
-        <h2><span class="n">3</span>其他意見</h2>
+        <h2><span class="n">4</span>其他意見</h2>
         <p class="lead">若有想補充的事項（例如特定日期請假、希望調整時段等），請填在這裡（可留空）。</p>
         <div class="field">
           <label for="commentInput">其他意見（選填）</label>
@@ -251,14 +266,13 @@
 
       <div class="card">
         <div class="submit-row">
-          <button class="btn btn-primary" id="submitBtn">送出我的意願</button>
-          <span class="hint">送出後可隨時回來修改。</span>
+          <button class="btn btn-primary" id="submitBtn">儲存這位學員</button>
+          <span class="hint">每位學員分開儲存；切換到別位前記得先儲存。</span>
         </div>
         <div class="toast" id="toast"></div>
       </div>
     </section>
 
-    <!-- 管理員面板 -->
     <section class="panel" id="panel-admin">
       <div class="card">
         <h2>📊 整體彙總</h2>
@@ -269,7 +283,7 @@
           <button class="btn btn-ghost" id="refreshBtn">🔄 重新整理</button>
         </div>
         <div class="note">
-          CSV 採 UTF-8 編碼並含 BOM，用 Excel 開啟中文不會亂碼。明細為「一列一場次」（姓名／Email／日期／星期／場次／意願／其他意見），方便匯入排程或點名系統。
+          CSV 採 UTF-8 編碼並含 BOM。明細為「一列一場次」（學員姓名／填寫帳號／日期／星期／場次／意願／其他意見），同一帳號代填的多位學員會各自獨立列出。
         </div>
       </div>
       <div class="card">
@@ -284,14 +298,14 @@
     </section>
   </div>
 
-  <footer>採用 Google 帳號登入；每人一份、可隨時修改，出席名單與匯出僅管理員可見。</footer>
+  <footer>採用 Google 帳號登入；一個帳號可填多位學員，各自獨立、可隨時修改。出席名單與匯出僅管理員可見。</footer>
 </div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, getDocs, collection, serverTimestamp }
+  import { getFirestore, doc, setDoc, getDoc, getDocs, deleteDoc, collection, query, where, serverTimestamp }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
   /* ════════════════════════════════════════════════════════
@@ -306,10 +320,8 @@
     appId: "1:890910687436:web:e9bd3c70654595db6d4269"
   };
 
-  /* ★★ 請把下面換成「你（管理員）的 Google 登入信箱」★★
-     可填多個，例如：["a@gmail.com", "b@gmail.com"]
-     只有名單內的帳號登入後，才會看到「管理員專區」與匯出功能。 */
-  const ADMIN_EMAILS = ["請改成你的管理員Email@gmail.com"];
+  /* ★★ 管理員 Email（可多個），只有這些帳號登入才看得到管理員專區與匯出 ★★ */
+  const ADMIN_EMAILS = ["huichungw@gmail.com"];
   /* ════════════════════════════════════════════════════════ */
 
   const app  = initializeApp(firebaseConfig);
@@ -327,35 +339,35 @@
   const SESS_LABEL = {am:"晨訓", pm:"午訓"};
   const SESS_SHORT = {am:"晨", pm:"午"};
 
-  let responses = {};
-  let allSubs = [];
   let currentUser = null;
   let isAdmin = false;
+
+  // 多學員：每位是一個物件 {id, name, responses, comment}
+  let myStudents = [];     // 此帳號底下的學員清單
+  let activeId = null;     // 目前正在編輯的學員 id
+  let responses = {};      // 目前學員的場次（指向 activeStudent.responses）
+  let allSubs = [];        // 管理員用：全部學員
 
   const $ = id => document.getElementById(id);
   const pad = n => String(n).padStart(2,"0");
   const dateKey = (mo,d) => `${YEAR}-${pad(mo+1)}-${pad(d)}`;
   const daysIn = (mo) => new Date(YEAR, mo+1, 0).getDate();
   const isRest = (mo,d) => new Date(YEAR,mo,d).getDay()===0;
+  const newId = () => "stu_" + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+  const esc = s => String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
 
-  /* ---------- 登入流程 ---------- */
+  /* ---------- 登入 ---------- */
   onAuthStateChanged(auth, async (user)=>{
     currentUser = user;
     if(!user){ showLogin(); return; }
     isAdmin = ADMIN_EMAILS.map(e=>e.toLowerCase()).includes((user.email||"").toLowerCase());
     showApp(user);
-    await loadMine(user.uid);
+    await loadMyStudents();
   });
 
-  function showLogin(){
-    $("loginCard").style.display="block";
-    $("appShell").style.display="none";
-    $("authBar").style.display="none";
-  }
+  function showLogin(){ $("loginCard").style.display="block"; $("appShell").style.display="none"; $("authBar").style.display="none"; }
   function showApp(user){
-    $("loginCard").style.display="none";
-    $("appShell").style.display="block";
-    $("authBar").style.display="flex";
+    $("loginCard").style.display="none"; $("appShell").style.display="block"; $("authBar").style.display="flex";
     $("whoText").innerHTML = `以 <small>${esc(user.email||user.displayName||"")}</small> 登入中`;
     $("adminBadge").style.display = isAdmin ? "inline-block" : "none";
     $("tabAdmin").style.display = isAdmin ? "inline-block" : "none";
@@ -364,35 +376,119 @@
   $("loginBtn").addEventListener("click", async ()=>{
     const t=$("loginToast");
     try{ await signInWithPopup(auth, provider); }
-    catch(e){
-      t.className="toast err";
-      t.textContent = "登入未完成：" + (e.code||e.message||"請再試一次") +
-        "。若在內嵌預覽視窗中，請改用實際網址或另開分頁。";
-    }
+    catch(e){ t.className="toast err"; t.textContent="登入未完成："+(e.code||e.message||"請再試一次")+"。"; }
   });
   $("logoutBtn").addEventListener("click", ()=> signOut(auth));
 
-  async function loadMine(uid){
+  /* ---------- 載入此帳號的學員 ---------- */
+  async function loadMyStudents(){
+    myStudents = [];
     try{
-      const snap = await getDoc(doc(db,"submissions",uid));
-      if(snap.exists()){
-        const d=snap.data();
-        responses = d.responses || {};
-        $("nameInput").value = d.name || currentUser.displayName || "";
-        $("commentInput").value = d.comment || "";
-      } else {
-        responses = {};
-        $("nameInput").value = currentUser.displayName || "";
-        $("commentInput").value = "";
-      }
-    }catch(e){ responses={}; }
+      const qs = await getDocs(query(collection(db,"submissions"), where("ownerUid","==",currentUser.uid)));
+      myStudents = qs.docs.map(d=>{
+        const v=d.data();
+        return { id:d.id, name:v.name||"", responses:v.responses||{}, comment:v.comment||"" };
+      });
+    }catch(e){ myStudents=[]; }
+
+    if(myStudents.length===0){
+      // 第一次：自動建一位（用登入名稱當預設姓名，但尚未存到雲端，待按儲存才寫入）
+      const s={ id:newId(), name: currentUser.displayName||"", responses:{}, comment:"", _unsaved:true };
+      myStudents.push(s);
+    }
+    activeId = myStudents[0].id;
+    renderStudents();
+    loadActiveIntoForm();
+  }
+
+  function activeStudent(){ return myStudents.find(s=>s.id===activeId); }
+
+  function renderStudents(){
+    const el=$("students");
+    let html = myStudents.map(s=>{
+      const label = s.name ? esc(s.name) : "（未命名）";
+      const active = s.id===activeId ? "active" : "";
+      return `<button class="stud-chip ${active}" data-id="${s.id}" type="button">
+        ${label}${s._unsaved?" •":""}
+        <span class="x" data-del="${s.id}" title="刪除這位學員">✕</span>
+      </button>`;
+    }).join("");
+    html += `<button class="stud-chip add" id="addStud" type="button">＋ 新增學員</button>`;
+    el.innerHTML = html;
+
+    el.querySelectorAll(".stud-chip[data-id]").forEach(btn=>{
+      btn.addEventListener("click", (e)=>{
+        if(e.target.dataset.del) return; // 交給刪除處理
+        switchStudent(btn.dataset.id);
+      });
+    });
+    el.querySelectorAll(".x[data-del]").forEach(x=>{
+      x.addEventListener("click", (e)=>{ e.stopPropagation(); deleteStudent(x.dataset.del); });
+    });
+    $("addStud").addEventListener("click", addStudent);
+
+    const count = myStudents.length;
+    $("studHint").textContent = count>1
+      ? `這個帳號目前有 ${count} 位學員。切換不同學員前，記得先按下方「儲存這位學員」。`
+      : "需要幫第二位小孩填寫嗎？按「＋ 新增學員」即可。";
+  }
+
+  function loadActiveIntoForm(){
+    const s=activeStudent();
+    responses = s.responses;
+    $("nameInput").value = s.name||"";
+    $("commentInput").value = s.comment||"";
+    $("toast").className="toast"; $("toast").textContent="";
     repaintAll();
+  }
+
+  // 把畫面上目前輸入暫存回 active 物件（切換/新增前呼叫，避免遺失）
+  function stashForm(){
+    const s=activeStudent(); if(!s) return;
+    s.name = $("nameInput").value.trim();
+    s.comment = $("commentInput").value.trim();
+    // responses 是同一個物件參照，已即時更新
+  }
+
+  function switchStudent(id){
+    if(id===activeId) return;
+    stashForm();
+    activeId=id;
+    renderStudents();
+    loadActiveIntoForm();
+  }
+
+  function addStudent(){
+    stashForm();
+    const s={ id:newId(), name:"", responses:{}, comment:"", _unsaved:true };
+    myStudents.push(s);
+    activeId=s.id;
+    renderStudents();
+    loadActiveIntoForm();
+    $("nameInput").focus();
+  }
+
+  async function deleteStudent(id){
+    const s=myStudents.find(x=>x.id===id); if(!s) return;
+    const label = s.name||"這位未命名學員";
+    if(!confirm(`確定要刪除「${label}」的填寫嗎？此動作無法復原。`)) return;
+    if(!s._unsaved){
+      try{ await deleteDoc(doc(db,"submissions",id)); }
+      catch(e){ alert("刪除失敗："+(e.code||e.message)); return; }
+    }
+    myStudents = myStudents.filter(x=>x.id!==id);
+    if(myStudents.length===0){
+      const ns={ id:newId(), name: currentUser.displayName||"", responses:{}, comment:"", _unsaved:true };
+      myStudents.push(ns);
+    }
+    activeId = myStudents[0].id;
+    renderStudents();
+    loadActiveIntoForm();
   }
 
   /* ---------- 月曆 ---------- */
   function buildCalendars(){
-    const root = $("calendars");
-    root.innerHTML = "";
+    const root=$("calendars"); root.innerHTML="";
     MONTHS.forEach(({m,label,en})=>{
       const sec=document.createElement("div"); sec.className="month";
       let html=`<div class="month-h">${label} <em>${en} ${YEAR}</em>
@@ -422,20 +518,12 @@
     root.querySelectorAll(".pill").forEach(p=> p.addEventListener("click", ()=>cyclePill(p)));
     root.querySelectorAll(".mini-q").forEach(b=> b.addEventListener("click", ()=>quick(b.dataset.q, parseInt(b.dataset.month,10))));
   }
-
   function paintPill(p){
-    const s=responses[p.dataset.key];
-    const ic=p.querySelector(".ic");
-    const base=SESS_SHORT[p.dataset.sess];
-    if(s){ p.setAttribute("data-s",s); ic.textContent=ICON[s]; }
-    else { p.removeAttribute("data-s"); ic.textContent=""; }
+    const s=responses[p.dataset.key]; const ic=p.querySelector(".ic"); const base=SESS_SHORT[p.dataset.sess];
+    if(s){ p.setAttribute("data-s",s); ic.textContent=ICON[s]; } else { p.removeAttribute("data-s"); ic.textContent=""; }
     p.childNodes.forEach(n=>{ if(n.nodeType===3) n.textContent=base; });
   }
-  function cyclePill(p){
-    const k=p.dataset.key, next=ORDER[responses[k]||null];
-    if(next) responses[k]=next; else delete responses[k];
-    paintPill(p);
-  }
+  function cyclePill(p){ const k=p.dataset.key, next=ORDER[responses[k]||null]; if(next) responses[k]=next; else delete responses[k]; paintPill(p); }
   function repaintAll(){ document.querySelectorAll(".pill").forEach(paintPill); }
   function quick(action, month){
     document.querySelectorAll(".pill").forEach(p=>{
@@ -448,51 +536,44 @@
     repaintAll();
   }
 
-  /* ---------- 送出（寫入 Firestore） ---------- */
+  /* ---------- 儲存目前學員 ---------- */
   async function submit(){
-    const name=$("nameInput").value.trim();
-    const comment=$("commentInput").value.trim();
     const toast=$("toast");
     if(!currentUser){ toast.className="toast err"; toast.textContent="請先登入。"; return; }
-    if(!name){ toast.className="toast err"; toast.textContent="請先輸入學員姓名。"; $("nameInput").focus(); return; }
-    if(Object.keys(responses).length===0){ toast.className="toast err"; toast.textContent="請至少勾選一個場次的意願再送出。"; return; }
+    stashForm();
+    const s=activeStudent();
+    if(!s.name){ toast.className="toast err"; toast.textContent="請先輸入學員姓名。"; $("nameInput").focus(); return; }
+    if(Object.keys(s.responses).length===0){ toast.className="toast err"; toast.textContent="請至少勾選一個場次的意願再儲存。"; return; }
     try{
-      await setDoc(doc(db,"submissions",currentUser.uid), {
-        name, email: currentUser.email||"", responses:{...responses}, comment, updatedAt: serverTimestamp()
+      await setDoc(doc(db,"submissions",s.id), {
+        ownerUid: currentUser.uid,
+        ownerEmail: currentUser.email||"",
+        name: s.name, responses:{...s.responses}, comment:s.comment,
+        updatedAt: serverTimestamp()
       });
+      s._unsaved=false;
+      renderStudents();
       toast.className="toast ok";
-      toast.textContent=`已儲存「${name}」的填寫，共 ${Object.keys(responses).length} 個場次。`;
+      toast.textContent=`已儲存「${s.name}」，共 ${Object.keys(s.responses).length} 個場次。`;
       if(isAdmin){ await loadAll(); renderSummary(); }
-    }catch(e){
-      toast.className="toast err";
-      toast.textContent="儲存失敗："+(e.code||e.message||"請稍後再試")+"（請確認 Firestore 已建立並設定好規則）。";
-    }
+    }catch(e){ toast.className="toast err"; toast.textContent="儲存失敗："+(e.code||e.message||"請稍後再試"); }
   }
 
-  /* ---------- 管理員：載入全部 ---------- */
+  /* ---------- 管理員：全部 ---------- */
   async function loadAll(){
     allSubs=[];
-    try{
-      const qs=await getDocs(collection(db,"submissions"));
-      allSubs=qs.docs.map(d=>d.data());
-    }catch(e){ allSubs=[]; }
+    try{ const qs=await getDocs(collection(db,"submissions")); allSubs=qs.docs.map(d=>d.data()); }catch(e){ allSubs=[]; }
     allSubs.sort((a,b)=>{
       const ta=a.updatedAt&&a.updatedAt.seconds?a.updatedAt.seconds:0;
-      const tb=b.updatedAt&&b.updatedAt.seconds?b.updatedAt.seconds:0;
-      return tb-ta;
+      const tb=b.updatedAt&&b.updatedAt.seconds?b.updatedAt.seconds:0; return tb-ta;
     });
   }
-
   function renderSummary(){ renderStats(); renderRoster(); renderDaily(); }
-  function countByStatus(){
-    let yes=0,no=0;
-    allSubs.forEach(s=>Object.values(s.responses||{}).forEach(v=>{ if(v==="yes")yes++; else if(v==="no")no++; }));
-    return {yes,no};
-  }
+  function countByStatus(){ let yes=0,no=0; allSubs.forEach(s=>Object.values(s.responses||{}).forEach(v=>{ if(v==="yes")yes++; else if(v==="no")no++; })); return {yes,no}; }
   function renderStats(){
     const c=countByStatus();
     $("statRow").innerHTML=`
-      <div class="stat"><div class="num">${allSubs.length}</div><div class="lbl">已填寫人數</div></div>
+      <div class="stat"><div class="num">${allSubs.length}</div><div class="lbl">已填寫學員數</div></div>
       <div class="stat"><div class="num">${c.yes}</div><div class="lbl">「參加」場次總數</div></div>
       <div class="stat"><div class="num">${c.no}</div><div class="lbl">「不參加」場次總數</div></div>`;
   }
@@ -502,14 +583,12 @@
     el.innerHTML=allSubs.map(s=>{
       const vals=Object.values(s.responses||{});
       const y=vals.filter(v=>v==="yes").length, n=vals.filter(v=>v==="no").length;
-      let tStr="";
-      if(s.updatedAt&&s.updatedAt.seconds){ const t=new Date(s.updatedAt.seconds*1000);
-        tStr=`${t.getFullYear()}/${t.getMonth()+1}/${t.getDate()} ${pad(t.getHours())}:${pad(t.getMinutes())}`; }
+      let tStr=""; if(s.updatedAt&&s.updatedAt.seconds){ const t=new Date(s.updatedAt.seconds*1000); tStr=`${t.getFullYear()}/${t.getMonth()+1}/${t.getDate()} ${pad(t.getHours())}:${pad(t.getMinutes())}`; }
       const cmt=s.comment?`<div class="cmt">💬 ${esc(s.comment)}</div>`:"";
       return `<div class="person">
         <div class="avatar">${esc((s.name||"?")[0]).toUpperCase()}</div>
         <div class="info"><div class="nm">${esc(s.name||"（未填名）")}</div>
-          <div class="tm">${esc(s.email||"")}${tStr?" · 填寫於 "+tStr:""}</div></div>
+          <div class="tm">填寫帳號：${esc(s.ownerEmail||"")}${tStr?" · "+tStr:""}</div></div>
         <div class="tally"><span class="tag y">參加 ${y}</span><span class="tag n">不參加 ${n}</span></div>
         ${cmt}</div>`;
     }).join("");
@@ -539,18 +618,17 @@
   function download(filename, rows){
     const csv=rows.map(r=>r.map(c=>{ const s=String(c??""); return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s; }).join(",")).join("\r\n");
     const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement("a"); a.href=url; a.download=filename;
+    const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=filename;
     document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
   }
   function exportDetail(){
     if(allSubs.length===0){ alert("目前沒有任何填寫資料可匯出。"); return; }
-    const rows=[["姓名","Email","日期","星期","場次","出席意願","其他意見"]];
+    const rows=[["學員姓名","填寫帳號","日期","星期","場次","出席意願","其他意見"]];
     allSubs.forEach(s=>{
       let first=true;
       Object.entries(s.responses||{}).forEach(([k,v])=>{
         const [date,sess]=k.split("_"); const dt=new Date(date+"T00:00:00");
-        rows.push([s.name||"", s.email||"", date, WD[dt.getDay()], SESS_LABEL[sess]||sess, LABEL[v]||v, first?(s.comment||""):""]);
+        rows.push([s.name||"", s.ownerEmail||"", date, WD[dt.getDay()], SESS_LABEL[sess]||sess, LABEL[v]||v, first?(s.comment||""):""]);
         first=false;
       });
     });
@@ -572,15 +650,13 @@
     download(`游泳訓練出席意願_每日彙總_${stamp()}.csv`, rows);
   }
   function stamp(){ const d=new Date(); return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}`; }
-  function esc(s){ return String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])); }
 
-  /* ---------- 分頁與按鈕 ---------- */
+  /* ---------- 綁定 ---------- */
   document.querySelectorAll(".tab").forEach(t=>{
     t.addEventListener("click", async ()=>{
       document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
       document.querySelectorAll(".panel").forEach(x=>x.classList.remove("show"));
-      t.classList.add("active");
-      $("panel-"+t.dataset.tab).classList.add("show");
+      t.classList.add("active"); $("panel-"+t.dataset.tab).classList.add("show");
       if(t.dataset.tab==="admin" && isAdmin){ await loadAll(); renderSummary(); }
     });
   });
