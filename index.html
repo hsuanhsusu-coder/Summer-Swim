@@ -311,7 +311,8 @@
         <div class="card">
           <div class="submit-row">
             <button class="btn btn-primary" id="submitBtn">儲存這位學員</button>
-            <span class="hint">每位學員分開儲存。</span>
+            <button class="btn btn-ghost" id="printBtn">🖨️ 列印 / 存成 PDF</button>
+            <span class="hint">每位學員分開儲存；列印前請先儲存。</span>
           </div>
           <div class="toast" id="toast"></div>
         </div>
@@ -579,7 +580,75 @@
     }catch(e){ toast.className="toast err"; toast.textContent="儲存失敗："+(e.code||e.message); }
   }
 
-  /* ---------- 管理員：載入名單 ---------- */
+  /* ---------- 家長：下載目前這位學員的出席紀錄 ---------- */
+  function printMyStudent(){
+    const s=activeStudent(); if(!s)return;
+    const resp={...responses};
+    const t=tallyResponses(resp);
+    if(t.total===0){ const tt=$("toast"); tt.className="toast err"; tt.textContent="這位學員目前沒有勾選任何出席場次，請先勾選再列印。"; return; }
+
+    // 組出兩個月的列印用月曆
+    function monthHtml(m,label){
+      let cells="";
+      const first=new Date(YEAR,m,1).getDay();
+      for(let i=0;i<first;i++) cells+=`<td class="empty"></td>`;
+      const total=daysIn(m);
+      let col=first;
+      for(let d=1;d<=total;d++){
+        const dow=new Date(YEAR,m,d).getDay(), dk=dateKey(m,d);
+        let inner="";
+        if(isSchoolStart(m,d)){ inner=`<div class="dn">${d}</div><div class="rt">開學</div>`; }
+        else if(dow===0){ inner=`<div class="dn">${d}</div><div class="rt">休息</div>`; }
+        else{
+          let marks="";
+          ["am","pm"].forEach(sess=>{ const key=dk+"_"+sess;
+            if(resp[key]==="yes"){ const v=venueOfKey(key); marks+=`<div class="mk"><span class="ck">✓</span>${SESS_SHORT[sess]} ${v}</div>`; }
+          });
+          inner=`<div class="dn">${d}</div>${marks||'<div class="no">—</div>'}`;
+        }
+        cells+=`<td>${inner}</td>`;
+        col++; if(col%7===0){ cells+=`</tr><tr>`; }
+      }
+      return `<h2>${label} ${YEAR}</h2>
+        <table class="cal"><thead><tr>${DOW.map(x=>`<th>${x}</th>`).join("")}</tr></thead>
+        <tbody><tr>${cells}</tr></tbody></table>`;
+    }
+
+    const w=window.open("","_blank");
+    if(!w){ const tt=$("toast"); tt.className="toast err"; tt.textContent="瀏覽器擋住了列印視窗，請允許彈出視窗後再試。"; return; }
+    w.document.write(`<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="UTF-8">
+      <title>${esc(s.name)} 暑期訓練出席表</title>
+      <style>
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;color:#0a2228;padding:24px;line-height:1.5}
+        h1{font-size:22px;color:#0a4f5e;margin-bottom:4px}
+        .info{font-size:13px;color:#3c6068;margin-bottom:6px}
+        .sum{font-size:13px;margin:10px 0 16px;padding:9px 12px;background:#eef9fa;border-left:3px solid #13a3b8;border-radius:0 6px 6px 0}
+        h2{font-size:16px;color:#0a4f5e;margin:18px 0 6px;border-bottom:1.5px solid #cfe6e9;padding-bottom:4px}
+        table.cal{width:100%;border-collapse:collapse;table-layout:fixed}
+        .cal th{font-size:11px;color:#3c6068;padding:4px;border:1px solid #e0eef0;background:#f4fafb}
+        .cal td{border:1px solid #e0eef0;vertical-align:top;height:62px;padding:3px;font-size:11px}
+        .cal td.empty{background:#fafdfd;border:none}
+        .dn{font-weight:700;font-size:12px;margin-bottom:2px}
+        .mk{font-size:10px;font-weight:700;color:#0a6b60;background:#e4f6f2;border-radius:3px;padding:1px 3px;margin-top:2px}
+        .mk .ck{color:#0f9d8f;margin-right:2px}
+        .no{color:#c2cdcf;font-size:11px}
+        .rt{color:#aab;font-size:10px;font-weight:700;margin-top:6px}
+        .foot{margin-top:18px;font-size:11px;color:#8aa}
+        @media print{ body{padding:0} .noprint{display:none} }
+        .pbtn{margin:16px 0;padding:10px 22px;font-size:14px;font-weight:700;background:#0a4f5e;color:#fff;border:none;border-radius:10px;cursor:pointer}
+      </style></head><body>
+      <button class="pbtn noprint" onclick="window.print()">🖨️ 列印 / 另存為 PDF</button>
+      <h1>2026 龍門泳隊暑期訓練 · 出席表</h1>
+      <div class="info">學員：${esc(s.name)} ｜ ${esc(s.grade)} ｜ ${s.cls} 班 ｜ ${s.seat} 號</div>
+      <div class="sum">出席合計 <b>${t.total}</b> 場（七月 ${t.jul}、八月 ${t.aug}）｜ 龍門 ${t.long} 場、永運 ${t.yong} 場</div>
+      ${monthHtml(6,"七月")}
+      ${monthHtml(7,"八月")}
+      <div class="foot">綠底打勾為填報「會出席」的場次，每格標示晨/午與地點。每週日休息、8/31 開學不訓練。</div>
+      <script>window.onload=function(){setTimeout(function(){window.print();},400);};<\/script>
+      </body></html>`);
+    w.document.close();
+  }
   async function loadAllStudents(){
     allStudents=[];
     try{ const qs=await getDocs(collection(db,"students")); allStudents=qs.docs.map(d=>({id:d.id,...d.data()})); }catch(e){ allStudents=[]; }
@@ -746,6 +815,7 @@
   }));
   $("clearBtn").addEventListener("click",()=>quick("clear"));
   $("submitBtn").addEventListener("click",submit);
+  $("printBtn").addEventListener("click",printMyStudent);
   $("initBtn").addEventListener("click",initRoster);
   $("addStuBtn").addEventListener("click",addStudent);
   $("reloadRosterBtn").addEventListener("click",async()=>{ await loadAllStudents(); renderBindUI(); renderSummary(); });
