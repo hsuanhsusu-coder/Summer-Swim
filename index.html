@@ -162,6 +162,14 @@
   .radmin-row .ord{font-weight:900;color:var(--pool);min-width:26px;text-align:center;font-size:.86rem}
   .radmin-row .nm{font-weight:700;min-width:120px}
   .radmin-row .nm small{display:block;font-weight:500;color:var(--ink-soft);font-size:.76rem}
+  .radmin-row .info-edit{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+  .radmin-row .info-edit .ord-badge{font-weight:900;color:var(--pool);font-size:.86rem;min-width:22px;text-align:center}
+  .radmin-row .info-edit input{font-family:inherit;font-size:.88rem;padding:7px 9px;border:1.5px solid var(--line);border-radius:8px;background:#fff}
+  .radmin-row .info-edit input.w-name{width:88px}
+  .radmin-row .info-edit input.w-grade{width:78px}
+  .radmin-row .info-edit input.w-small{width:52px}
+  .radmin-row .info-edit input:focus{outline:none;border-color:var(--pool-bright);box-shadow:0 0 0 3px var(--pool-light)}
+  .radmin-row .info-edit label{font-size:.72rem;color:var(--ink-soft);font-weight:600}
   .radmin-row .bind{flex:1;min-width:180px}
   .radmin-row .bind input{width:100%;font-family:inherit;font-size:.9rem;padding:8px 12px;border:1.5px solid var(--line);border-radius:9px;background:#fff}
   .radmin-row .bind input:focus{outline:none;border-color:var(--pool-bright);box-shadow:0 0 0 3px var(--pool-light)}
@@ -340,7 +348,7 @@
           <h2>👨‍👩‍👧 名單與家長綁定
             <button class="iconbtn save btn-sm" id="reloadRosterBtn" style="margin-left:auto">🔄 重新整理</button>
           </h2>
-          <p class="lead">在每位學員後面填入「家長的 Google 登入信箱」並按「儲存」。家長用該信箱登入後，就會看到被指派的孩子。一個家長信箱可填在多位學員上（綁多個小孩）。順序固定不變；新增的人加在最後、停用的人不重排。</p>
+          <p class="lead">每位學員的「姓名／年級／班級／座號」都可以直接改（例如升年級、補上新隊員的班級座號），右邊填家長的 Google 信箱，改完按「儲存」。家長用該信箱登入後就會看到孩子。一個家長可填在多位學員上；新增的人加在最後、停用的人不重排，順序固定不變。</p>
           <div class="roster-admin" id="rosterAdmin"></div>
 
           <div class="add-form">
@@ -488,6 +496,14 @@
   const isTrainingDay=(mo,d)=>!isRest(mo,d)&&!isSchoolStart(mo,d);
   const esc=s=>String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
   const lc=s=>String(s||"").trim().toLowerCase();
+  // 把 年級/班級/座號 組成一行，空的自動略過
+  function studentMeta(s){
+    const parts=[];
+    if(s.grade) parts.push(esc(s.grade));
+    if(s.cls!=null && String(s.cls).trim()!=="") parts.push(esc(s.cls)+"班");
+    if(s.seat!=null && String(s.seat).trim()!=="") parts.push(esc(s.seat)+"號");
+    return parts.join(" · ");
+  }
 
   /* ---------- 登入 ---------- */
   onAuthStateChanged(auth, async (user)=>{
@@ -549,14 +565,14 @@
   function activeStudent(){ return myStudents.find(s=>s.id===activeId); }
   function renderStudentChips(){
     $("students").innerHTML=myStudents.map(s=>
-      `<button class="stud-chip ${s.id===activeId?'active':''}" data-id="${s.id}" type="button">${esc(s.name)} <small>${s.seat}號·${esc(s.grade)}</small></button>`
+      `<button class="stud-chip ${s.id===activeId?'active':''}" data-id="${s.id}" type="button">${esc(s.name)} <small>${studentMeta(s)}</small></button>`
     ).join("");
     $("students").querySelectorAll(".stud-chip").forEach(b=> b.addEventListener("click",()=>switchStudent(b.dataset.id)));
   }
   function loadActiveIntoForm(){
     const s=activeStudent();
     responses=s.responses?{...s.responses}:{};
-    $("whoNow").innerHTML=`正在填寫：${esc(s.name)}<small>${esc(s.grade)} · ${s.cls} 班 · ${s.seat} 號</small>`;
+    $("whoNow").innerHTML=`正在填寫：${esc(s.name)}<small>${studentMeta(s)}</small>`;
     $("commentInput").value=s.comment||"";
     $("toast").className="toast"; $("toast").textContent="";
     repaintAll(); updateMyStats();
@@ -685,7 +701,7 @@
       </style></head><body>
       <button class="pbtn noprint" onclick="window.print()">🖨️ 列印 / 另存為 PDF</button>
       <h1>2026 龍門泳隊暑期訓練 · 出席表</h1>
-      <div class="info">學員：${esc(s.name)} ｜ ${esc(s.grade)} ｜ ${s.cls} 班 ｜ ${s.seat} 號</div>
+      <div class="info">學員：${esc(s.name)}${studentMeta(s)?" ｜ "+studentMeta(s):""}</div>
       <div class="sum">出席合計 <b>${t.total}</b> 場（七月 ${t.jul}、八月 ${t.aug}）｜ 龍門 ${t.long} 場、永運 ${t.yong} 場</div>
       ${monthHtml(6,"七月")}
       ${monthHtml(7,"八月")}
@@ -773,8 +789,13 @@
     if(!hasRoster) return;
     $("rosterAdmin").innerHTML=allStudents.map(s=>`
       <div class="radmin-row ${s.active===false?'off':''}" data-id="${s.id}">
-        <span class="ord">${s.order}</span>
-        <span class="nm">${esc(s.name)}<small>${esc(s.grade)} · ${s.cls}班 · ${s.seat}號</small></span>
+        <span class="info-edit">
+          <span class="ord-badge">${s.order}</span>
+          <input class="w-name" placeholder="姓名" value="${esc(s.name||"")}" data-f-name="${s.id}">
+          <input class="w-grade" placeholder="年級" value="${esc(s.grade||"")}" data-f-grade="${s.id}">
+          <input class="w-small" placeholder="班級" value="${esc(s.cls!=null?s.cls:"")}" data-f-cls="${s.id}">
+          <input class="w-small" placeholder="座號" value="${esc(s.seat!=null?s.seat:"")}" data-f-seat="${s.id}">
+        </span>
         <span class="bind"><input type="email" placeholder="家長信箱 1（如爸爸）" value="${esc(s.parentEmail||"")}" data-bind="${s.id}"></span>
         <span class="bind"><input type="email" placeholder="家長信箱 2（如媽媽，可留空）" value="${esc(s.parentEmail2||"")}" data-bind2="${s.id}"></span>
         <span class="bind"><input type="text" placeholder="備註（如：金采儀家，僅你看得到）" value="${esc(s.parentNote||"")}" data-note="${s.id}"></span>
@@ -791,14 +812,21 @@
     const email=lc(document.querySelector(`[data-bind="${id}"]`).value);
     const email2=lc(document.querySelector(`[data-bind2="${id}"]`).value);
     const note=(document.querySelector(`[data-note="${id}"]`).value||"").trim();
+    const name=(document.querySelector(`[data-f-name="${id}"]`).value||"").trim();
+    const grade=(document.querySelector(`[data-f-grade="${id}"]`).value||"").trim();
+    const cls=(document.querySelector(`[data-f-cls="${id}"]`).value||"").trim();
+    const seat=(document.querySelector(`[data-f-seat="${id}"]`).value||"").trim();
     const t=$("bindToast");
     const re=/^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+    if(!name){ t.className="toast err"; t.textContent="姓名不能空白。"; return; }
     if(email && !re.test(email)){ t.className="toast err"; t.textContent="家長信箱 1 格式怪怪的，請再確認。"; return; }
     if(email2 && !re.test(email2)){ t.className="toast err"; t.textContent="家長信箱 2 格式怪怪的，請再確認。"; return; }
     try{
-      await updateDoc(doc(db,"students",id), { parentEmail:email, parentEmail2:email2, parentNote:note });
-      const s=allStudents.find(x=>x.id===id); if(s){ s.parentEmail=email; s.parentEmail2=email2; s.parentNote=note; }
-      t.className="toast ok"; t.textContent=`已更新「${s?s.name:""}」的家長綁定。`;
+      await updateDoc(doc(db,"students",id), { name, grade, cls, seat, parentEmail:email, parentEmail2:email2, parentNote:note });
+      const s=allStudents.find(x=>x.id===id);
+      if(s){ s.name=name; s.grade=grade; s.cls=cls; s.seat=seat; s.parentEmail=email; s.parentEmail2=email2; s.parentNote=note; }
+      t.className="toast ok"; t.textContent=`已更新「${name}」的資料與綁定。`;
+      renderSummary();
     }catch(e){ t.className="toast err"; t.textContent="儲存失敗："+(e.code||e.message); }
   }
   async function toggleActive(id){
@@ -861,7 +889,7 @@
       const cmt=s.comment?`<div class="cmt">💬 ${esc(s.comment)}</div>`:"";
       return `<div class="person">
         <div class="avatar">${s.order}</div>
-        <div class="info"><div class="nm">${esc(s.name)} <small style="font-weight:500;color:var(--ink-soft)">${esc(s.grade)}·${s.seat}號</small></div>
+        <div class="info"><div class="nm">${esc(s.name)} <small style="font-weight:500;color:var(--ink-soft)">${studentMeta(s)}</small></div>
           <div class="tm">家長：${bind}${note}${filled?"":" · <span style='color:#c47'>尚未填寫</span>"}</div></div>
         <div class="tally"><span class="tag jul">七月 ${t.jul}</span><span class="tag aug">八月 ${t.aug}</span><span class="tag vl">龍門 ${t.long}</span><span class="tag vy">永運 ${t.yong}</span></div>
         ${cmt}</div>`;
