@@ -12,7 +12,9 @@
     --pool-deep:#0a4f5e; --pool:#13a3b8; --pool-bright:#2bc4d6;
     --pool-light:#d6f2f5; --pool-mist:#eef9fa; --sun:#ffb02e; --coral:#ff6f5e;
     --ink:#082a31; --ink-soft:#3c6068;
-    --yes:#0f9d8f; --yes-soft:#d4f3ef; --no:#ef5d4a; --no-soft:#fcdcd6;
+    --yes:#0f9d8f; --yes-soft:#d4f3ef;
+    --venue-long:#2f6fb0; --venue-long-soft:#e3eef9;
+    --venue-yong:#e0764f; --venue-yong-soft:#fbe9e1;
     --line:#cfe6e9; --shadow:0 18px 45px -22px rgba(8,42,49,.45);
   }
   *{box-sizing:border-box;margin:0;padding:0}
@@ -72,7 +74,6 @@
   .card h2 .n{font-size:.85rem;font-family:"Noto Sans TC";font-weight:900;color:#fff;background:var(--pool);width:26px;height:26px;border-radius:50%;display:grid;place-items:center;flex:none}
   .card p.lead{color:var(--ink-soft);font-size:.94rem;margin-bottom:18px}
 
-  /* 學員選擇列 */
   .students{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:6px}
   .stud-chip{display:inline-flex;align-items:center;gap:8px;font-family:inherit;font-size:.92rem;font-weight:700;cursor:pointer;
     border:1.5px solid var(--line);background:#fff;color:var(--ink-soft);padding:9px 16px;border-radius:999px;transition:.15s}
@@ -81,9 +82,8 @@
   .stud-chip.add{border-style:dashed;color:var(--pool-deep)}
   .stud-chip.add:hover{background:var(--pool-mist)}
   .stud-chip .x{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,.3);font-size:.7rem;line-height:1}
-  .stud-chip.active .x:hover{background:rgba(255,255,255,.55)}
   .stud-chip:not(.active) .x{background:#e7eef0}
-  .stud-chip:not(.active) .x:hover{background:var(--no-soft);color:var(--no)}
+  .stud-chip:not(.active) .x:hover{background:#fcdcd6;color:#c0392b}
   .stud-hint{font-size:.84rem;color:var(--ink-soft);margin-top:8px}
 
   .field{margin-bottom:4px}
@@ -92,21 +92,31 @@
   .field textarea{resize:vertical;min-height:90px;line-height:1.6}
   .field input:focus,.field textarea:focus{outline:none;border-color:var(--pool-bright);background:#fff;box-shadow:0 0 0 4px var(--pool-light)}
 
+  /* 個人即時統計 */
+  .mystats{display:flex;flex-wrap:wrap;gap:10px;margin:2px 0 4px}
+  .mystat{flex:1;min-width:108px;background:var(--pool-mist);border:1px solid #e3f1f2;border-radius:13px;padding:12px 14px}
+  .mystat .num{font-family:"Fraunces",serif;font-weight:900;font-size:1.7rem;color:var(--pool-deep);line-height:1}
+  .mystat .lbl{font-size:.78rem;color:var(--ink-soft);font-weight:500;margin-top:3px}
+  .mystat.long{background:var(--venue-long-soft);border-color:#cfe0f4}
+  .mystat.long .num{color:var(--venue-long)}
+  .mystat.yong{background:var(--venue-yong-soft);border-color:#f4d8cc}
+  .mystat.yong .num{color:var(--venue-yong)}
+
   .legend{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:6px 0 8px}
   .legend .lab{font-size:.85rem;font-weight:700;color:var(--ink-soft)}
   .key{display:inline-flex;align-items:center;gap:6px;font-size:.82rem;font-weight:500}
   .dot{width:15px;height:15px;border-radius:5px;display:inline-block}
-  .dot.y{background:var(--yes)} .dot.n{background:var(--no)} .dot.e{background:#e7eef0;border:1px solid var(--line)}
+  .dot.y{background:var(--yes)} .dot.e{background:#e7eef0;border:1px solid var(--line)}
+  .dot.vl{background:var(--venue-long)} .dot.vy{background:var(--venue-yong)}
 
   .quick{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 4px;align-items:center}
   .quick .qlab{font-size:.82rem;font-weight:700;color:var(--ink-soft)}
   .quick .qnote{font-size:.8rem;color:var(--ink-soft)}
   .qbtn{font-family:inherit;font-size:.82rem;font-weight:600;cursor:pointer;border:1.5px solid var(--line);background:#fff;color:var(--ink-soft);padding:7px 13px;border-radius:9px;transition:.15s}
   .qbtn:hover{border-color:var(--pool);color:var(--pool-deep);background:var(--pool-mist)}
-  .qbtn.clear:hover{border-color:var(--no);color:var(--no);background:var(--no-soft)}
+  .qbtn.clear:hover{border-color:var(--coral);color:var(--coral);background:#fcece8}
   .qbtn.mini-q{font-size:.76rem;padding:5px 11px}
   .qbtn.yes-q:hover{border-color:var(--yes);color:var(--yes);background:var(--yes-soft)}
-  .qbtn.no-q:hover{border-color:var(--no);color:var(--no);background:var(--no-soft)}
 
   .month{margin-top:26px}
   .month-h{font-family:"Fraunces",serif;font-weight:600;font-size:1.5rem;color:var(--pool-deep);margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-bottom:2px dashed var(--line);padding-bottom:9px}
@@ -116,18 +126,24 @@
   .dow div{text-align:center;font-size:.74rem;font-weight:700;color:var(--ink-soft);padding:2px}
   .dow div.sun-h{color:#b6c4c7}
   .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
-  .cell{background:var(--pool-mist);border:1px solid #e3f1f2;border-radius:11px;padding:6px 4px 7px;min-height:74px;display:flex;flex-direction:column}
+  .cell{background:var(--pool-mist);border:1px solid #e3f1f2;border-radius:11px;padding:6px 4px 7px;min-height:96px;display:flex;flex-direction:column}
   .cell.empty{background:transparent;border:none}
   .cell.rest{background:#f1f4f5;border:1px dashed #d3dee0}
-  .date{font-weight:900;font-size:.92rem;line-height:1;margin-bottom:auto}
+  .cell.school{background:#fff5e6;border:1px dashed #f1d39a}
+  .date{font-weight:900;font-size:.92rem;line-height:1;margin-bottom:6px}
   .date .wd{font-size:.62rem;font-weight:500;color:var(--ink-soft);margin-left:3px}
   .rest-tag{margin-top:auto;text-align:center;font-size:.72rem;font-weight:700;color:#aebbbe;padding-bottom:4px}
-  .sess{display:flex;flex-direction:column;gap:4px;margin-top:5px}
-  .pill{font-family:inherit;cursor:pointer;border:none;border-radius:7px;padding:5px 4px;font-size:.72rem;font-weight:700;color:var(--ink-soft);background:#e7eef0;display:flex;align-items:center;justify-content:center;gap:3px;transition:.13s;user-select:none;line-height:1}
+  .school-tag{margin-top:auto;text-align:center;font-size:.72rem;font-weight:700;color:#c79325;padding-bottom:4px}
+  .sess{display:flex;flex-direction:column;gap:4px;margin-top:auto}
+  .pill{font-family:inherit;cursor:pointer;border:none;border-radius:8px;padding:4px 4px;background:#e7eef0;color:var(--ink-soft);
+    display:flex;flex-direction:column;align-items:center;gap:1px;transition:.13s;user-select:none;line-height:1.1}
   .pill:hover{filter:brightness(.97);transform:translateY(-1px)}
-  .pill .ic{font-size:.7rem}
-  .pill[data-s="yes"]{background:var(--yes);color:#fff}
-  .pill[data-s="no"]{background:var(--no);color:#fff}
+  .pill .top{display:flex;align-items:center;gap:3px;font-size:.74rem;font-weight:900}
+  .pill .top .ic{font-size:.72rem}
+  .pill .venue{font-size:.62rem;font-weight:700}
+  .pill .venue.vl{color:var(--venue-long)} .pill .venue.vy{color:var(--venue-yong)}
+  .pill[data-on="1"]{background:var(--yes);color:#fff}
+  .pill[data-on="1"] .venue{color:#eafff9 !important}
 
   .submit-row{margin-top:6px;display:flex;flex-wrap:wrap;gap:12px;align-items:center}
   .btn{font-family:inherit;font-size:1rem;font-weight:700;cursor:pointer;border:none;border-radius:13px;padding:15px 30px;transition:.18s}
@@ -138,7 +154,7 @@
   .hint{font-size:.85rem;color:var(--ink-soft)}
   .toast{margin-top:14px;padding:13px 18px;border-radius:12px;font-weight:600;font-size:.92rem;display:none}
   .toast.ok{display:block;background:var(--yes-soft);color:#0a6b60;border:1px solid #9fe0d6}
-  .toast.err{display:block;background:var(--no-soft);color:#a83523;border:1px solid #f2b3a8}
+  .toast.err{display:block;background:#fcdcd6;color:#a83523;border:1px solid #f2b3a8}
 
   .stat-row{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:22px}
   .stat{flex:1;min-width:130px;background:var(--pool-mist);border:1px solid #e3f1f2;border-radius:15px;padding:16px 18px}
@@ -152,20 +168,25 @@
   .person .tm{font-size:.78rem;color:var(--ink-soft)}
   .person .tally{display:flex;gap:6px;flex-wrap:wrap;font-size:.74rem;align-items:center}
   .tag{padding:2px 8px;border-radius:7px;font-weight:700}
-  .tag.y{background:var(--yes-soft);color:#0a6b60}
-  .tag.n{background:var(--no-soft);color:#a83523}
+  .tag.jul{background:var(--pool-light);color:#0a5562}
+  .tag.aug{background:#e7f4d6;color:#4e7320}
+  .tag.vl{background:var(--venue-long-soft);color:var(--venue-long)}
+  .tag.vy{background:var(--venue-yong-soft);color:var(--venue-yong)}
   .person .cmt{flex-basis:100%;font-size:.84rem;color:var(--ink-soft);background:#fff;border-left:3px solid var(--pool-bright);padding:7px 12px;border-radius:0 8px 8px 0;margin-top:2px}
   .empty-state{text-align:center;color:var(--ink-soft);padding:36px 18px;font-size:.95rem}
   .empty-state .big{font-size:2.4rem;margin-bottom:8px}
 
   .daily{margin-top:6px;overflow-x:auto}
-  table{width:100%;border-collapse:collapse;font-size:.85rem;min-width:440px}
+  table{width:100%;border-collapse:collapse;font-size:.85rem;min-width:520px}
   th,td{padding:8px 10px;text-align:center;border-bottom:1px solid var(--line)}
   th{background:var(--pool-mist);font-weight:700;color:var(--pool-deep)}
   td.d{text-align:left;font-weight:700;white-space:nowrap}
   td .mini{display:inline-block;min-width:26px;padding:2px 7px;border-radius:6px;font-weight:700}
   .mini.has{background:var(--yes-soft);color:#0a6b60}
   .mini.zero{color:#b6c4c7}
+  .vbadge{display:inline-block;font-size:.68rem;font-weight:700;padding:1px 6px;border-radius:5px;margin-left:4px}
+  .vbadge.vl{background:var(--venue-long-soft);color:var(--venue-long)}
+  .vbadge.vy{background:var(--venue-yong-soft);color:var(--venue-yong)}
   .wk-divider td{background:#f3fafb;font-weight:900;color:var(--pool-deep);text-align:left}
 
   .export-row{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:8px}
@@ -173,8 +194,9 @@
   footer{text-align:center;color:var(--ink-soft);font-size:.8rem;padding:24px 0 8px}
 
   @media(max-width:560px){
-    .cell{min-height:66px;padding:5px 3px 6px}
-    .pill{font-size:.66rem;padding:5px 2px}
+    .cell{min-height:88px;padding:5px 3px 6px}
+    .pill .top{font-size:.68rem}
+    .pill .venue{font-size:.56rem}
     .date{font-size:.82rem}
     .date .wd{display:none}
     .month-h .mq{margin-left:0;width:100%}
@@ -191,9 +213,9 @@
     <h1><span class="yr">2026</span> 暑期游泳訓練</h1>
     <div class="sub">晨訓 / 午訓 出席意願調查</div>
     <div class="meta">
-      <span class="chip">📅 7月 &amp; 8月（每週日休息）</span>
+      <span class="chip">📅 7/1 – 8/30（每週日休息）</span>
       <span class="chip">🏊 晨訓 · 午訓</span>
-      <span class="chip">👨‍👩‍👧 一個帳號可填多位學員</span>
+      <span class="chip">📍 龍門 / 永運</span>
     </div>
   </header>
 
@@ -224,14 +246,13 @@
     <section class="panel show" id="panel-fill">
       <div class="card">
         <h2><span class="n">1</span>選擇學員</h2>
-        <p class="lead">這個帳號底下的學員都列在這裡。點名字可切換填寫對象，按「＋ 新增學員」可加入更多人（例如家中第二個小孩）。</p>
+        <p class="lead">這個帳號底下的學員都列在這裡。點名字可切換填寫對象，按「＋ 新增學員」可加入更多人。切換不同學員前，記得先按下方「儲存這位學員」。</p>
         <div class="students" id="students"></div>
         <div class="stud-hint" id="studHint"></div>
       </div>
 
       <div class="card">
         <h2><span class="n">2</span>學員姓名</h2>
-        <p class="lead">目前正在填寫的學員姓名。修改後送出即會更新。</p>
         <div class="field">
           <label for="nameInput">學員姓名</label>
           <input id="nameInput" type="text" placeholder="例如：陳小魚" maxlength="40" autocomplete="off">
@@ -239,19 +260,30 @@
       </div>
 
       <div class="card">
-        <h2><span class="n">3</span>勾選出席意願</h2>
-        <p class="lead">點一下每天的「晨」（晨訓）或「午」（午訓）即可切換：未填 → 參加 → 不參加。每週日為休息日，不安排訓練。</p>
-        <div class="legend">
-          <span class="lab">狀態：</span>
-          <span class="key"><span class="dot e"></span>未填</span>
-          <span class="key"><span class="dot y"></span>參加</span>
-          <span class="key"><span class="dot n"></span>不參加</span>
+        <h2><span class="n">3</span>勾選會出席的場次</h2>
+        <p class="lead">點一下每天的「晨」（晨訓）或「午」（午訓）即標記為會出席（綠色打勾），再點一次取消。沒有要出席的場次留空即可。每場下方標示當天的訓練地點。每週日休息、8/31 開學日不安排訓練。</p>
+
+        <div class="mystats">
+          <div class="mystat"><div class="num" id="msJul">0</div><div class="lbl">七月出席場次</div></div>
+          <div class="mystat"><div class="num" id="msAug">0</div><div class="lbl">八月出席場次</div></div>
+          <div class="mystat long"><div class="num" id="msLong">0</div><div class="lbl">在龍門場次</div></div>
+          <div class="mystat yong"><div class="num" id="msYong">0</div><div class="lbl">在永運場次</div></div>
         </div>
+
+        <div class="legend">
+          <span class="lab">說明：</span>
+          <span class="key"><span class="dot e"></span>未填</span>
+          <span class="key"><span class="dot y"></span>會出席</span>
+          <span class="key"><span class="dot vl"></span>龍門</span>
+          <span class="key"><span class="dot vy"></span>永運</span>
+        </div>
+
         <div class="quick">
           <span class="qlab">快速填入：</span>
           <button class="qbtn clear" id="clearBtn">全部清空</button>
-          <span class="qnote">每個月可用下方標題旁的按鈕，一鍵把整月設為參加或不參加。</span>
+          <span class="qnote">每個月可用下方標題旁的「本月全部出席」一鍵填入。</span>
         </div>
+
         <div id="calendars"></div>
       </div>
 
@@ -267,7 +299,7 @@
       <div class="card">
         <div class="submit-row">
           <button class="btn btn-primary" id="submitBtn">儲存這位學員</button>
-          <span class="hint">每位學員分開儲存；切換到別位前記得先儲存。</span>
+          <span class="hint">每位學員分開儲存。</span>
         </div>
         <div class="toast" id="toast"></div>
       </div>
@@ -279,11 +311,12 @@
         <div class="stat-row" id="statRow"></div>
         <div class="export-row">
           <button class="btn btn-primary" id="exportBtn">⬇️ 匯出 CSV（明細）</button>
-          <button class="btn btn-ghost" id="exportSumBtn">⬇️ 匯出每日彙總 CSV</button>
+          <button class="btn btn-ghost" id="exportMonthBtn">⬇️ 個人月統計 CSV</button>
+          <button class="btn btn-ghost" id="exportSumBtn">⬇️ 每日彙總 CSV</button>
           <button class="btn btn-ghost" id="refreshBtn">🔄 重新整理</button>
         </div>
         <div class="note">
-          CSV 採 UTF-8 編碼並含 BOM。明細為「一列一場次」（學員姓名／填寫帳號／日期／星期／場次／意願／其他意見），同一帳號代填的多位學員會各自獨立列出。
+          CSV 採 UTF-8 編碼並含 BOM。明細為「一列一個出席場次」（學員姓名／填寫帳號／日期／星期／場次／地點）；個人月統計列出每位學員七月、八月各出席幾場與地點分佈。
         </div>
       </div>
       <div class="card">
@@ -291,8 +324,8 @@
         <div class="roster" id="roster"></div>
       </div>
       <div class="card">
-        <h2>📅 每日參加人數</h2>
-        <p class="lead">數字代表勾選「參加」的人數（已排除週日休息日）。</p>
+        <h2>📅 每日出席人數</h2>
+        <p class="lead">數字代表勾選「會出席」的人數；場次旁標示當天訓練地點（已排除週日與開學日）。</p>
         <div class="daily" id="daily"></div>
       </div>
     </section>
@@ -305,12 +338,10 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, getDocs, deleteDoc, collection, query, where, serverTimestamp }
+  import { getFirestore, doc, setDoc, getDocs, deleteDoc, collection, query, where, serverTimestamp }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  /* ════════════════════════════════════════════════════════
-     你的 Firebase 設定（已填入）
-     ════════════════════════════════════════════════════════ */
+  /* ════════ 你的 Firebase 設定 ════════ */
   const firebaseConfig = {
     apiKey: "AIzaSyCU6ZBOVid-aCcooxtYPlVPHLnLd_PRmzw",
     authDomain: "summer-swim-2026.firebaseapp.com",
@@ -319,10 +350,9 @@
     messagingSenderId: "890910687436",
     appId: "1:890910687436:web:e9bd3c70654595db6d4269"
   };
-
-  /* ★★ 管理員 Email（可多個），只有這些帳號登入才看得到管理員專區與匯出 ★★ */
+  /* ★ 管理員 Email（可多個） */
   const ADMIN_EMAILS = ["huichungw@gmail.com"];
-  /* ════════════════════════════════════════════════════════ */
+  /* ════════════════════════════════════ */
 
   const app  = initializeApp(firebaseConfig);
   const auth = getAuth(app);
@@ -333,46 +363,51 @@
   const MONTHS = [{m:6,label:"七月",en:"July"},{m:7,label:"八月",en:"August"}];
   const WD = ["週日","週一","週二","週三","週四","週五","週六"];
   const DOW = ["日","一","二","三","四","五","六"];
-  const ORDER = {null:"yes", yes:"no", no:null};
-  const LABEL = {yes:"參加", no:"不參加"};
-  const ICON  = {yes:"✓", no:"✕"};
   const SESS_LABEL = {am:"晨訓", pm:"午訓"};
   const SESS_SHORT = {am:"晨", pm:"午"};
 
-  let currentUser = null;
-  let isAdmin = false;
+  /* ★ 晨訓在「龍門」的日期（其餘晨訓與所有午訓皆在永運）。
+     若地點有誤，改這裡即可：mm(月) → [日, 日, ...] */
+  const LONG_AM_DAYS = {
+    7: [13,14,15,16,17, 20,21,22,23,24, 27,28,29,30,31],
+    8: [3,4,5,6,7]
+  };
+  function venueOfKey(key){
+    const [date,sess]=key.split("_");
+    const p=date.split("-"); const mm=parseInt(p[1],10), d=parseInt(p[2],10);
+    if(sess==="pm") return "永運";
+    return (LONG_AM_DAYS[mm]||[]).includes(d) ? "龍門" : "永運";
+  }
+  const venueClass = v => v==="龍門" ? "vl" : "vy";
 
-  // 多學員：每位是一個物件 {id, name, responses, comment}
-  let myStudents = [];     // 此帳號底下的學員清單
-  let activeId = null;     // 目前正在編輯的學員 id
-  let responses = {};      // 目前學員的場次（指向 activeStudent.responses）
-  let allSubs = [];        // 管理員用：全部學員
+  let currentUser=null, isAdmin=false;
+  let myStudents=[], activeId=null, responses={}, allSubs=[];
 
   const $ = id => document.getElementById(id);
   const pad = n => String(n).padStart(2,"0");
   const dateKey = (mo,d) => `${YEAR}-${pad(mo+1)}-${pad(d)}`;
   const daysIn = (mo) => new Date(YEAR, mo+1, 0).getDate();
-  const isRest = (mo,d) => new Date(YEAR,mo,d).getDay()===0;
+  const isRest = (mo,d) => new Date(YEAR,mo,d).getDay()===0;          // 週日
+  const isSchoolStart = (mo,d) => (mo===7 && d===31);                  // 8/31 開學
+  const isTrainingDay = (mo,d) => !isRest(mo,d) && !isSchoolStart(mo,d);
   const newId = () => "stu_" + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
   const esc = s => String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
 
   /* ---------- 登入 ---------- */
   onAuthStateChanged(auth, async (user)=>{
-    currentUser = user;
+    currentUser=user;
     if(!user){ showLogin(); return; }
     isAdmin = ADMIN_EMAILS.map(e=>e.toLowerCase()).includes((user.email||"").toLowerCase());
     showApp(user);
     await loadMyStudents();
   });
-
   function showLogin(){ $("loginCard").style.display="block"; $("appShell").style.display="none"; $("authBar").style.display="none"; }
   function showApp(user){
     $("loginCard").style.display="none"; $("appShell").style.display="block"; $("authBar").style.display="flex";
     $("whoText").innerHTML = `以 <small>${esc(user.email||user.displayName||"")}</small> 登入中`;
-    $("adminBadge").style.display = isAdmin ? "inline-block" : "none";
-    $("tabAdmin").style.display = isAdmin ? "inline-block" : "none";
+    $("adminBadge").style.display = isAdmin?"inline-block":"none";
+    $("tabAdmin").style.display = isAdmin?"inline-block":"none";
   }
-
   $("loginBtn").addEventListener("click", async ()=>{
     const t=$("loginToast");
     try{ await signInWithPopup(auth, provider); }
@@ -380,110 +415,50 @@
   });
   $("logoutBtn").addEventListener("click", ()=> signOut(auth));
 
-  /* ---------- 載入此帳號的學員 ---------- */
+  /* ---------- 多學員 ---------- */
   async function loadMyStudents(){
-    myStudents = [];
+    myStudents=[];
     try{
-      const qs = await getDocs(query(collection(db,"submissions"), where("ownerUid","==",currentUser.uid)));
-      myStudents = qs.docs.map(d=>{
-        const v=d.data();
-        return { id:d.id, name:v.name||"", responses:v.responses||{}, comment:v.comment||"" };
-      });
+      const qs=await getDocs(query(collection(db,"submissions"), where("ownerUid","==",currentUser.uid)));
+      myStudents=qs.docs.map(d=>{ const v=d.data(); return {id:d.id, name:v.name||"", responses:v.responses||{}, comment:v.comment||""}; });
     }catch(e){ myStudents=[]; }
-
     if(myStudents.length===0){
-      // 第一次：自動建一位（用登入名稱當預設姓名，但尚未存到雲端，待按儲存才寫入）
-      const s={ id:newId(), name: currentUser.displayName||"", responses:{}, comment:"", _unsaved:true };
-      myStudents.push(s);
+      myStudents.push({ id:newId(), name:currentUser.displayName||"", responses:{}, comment:"", _unsaved:true });
     }
-    activeId = myStudents[0].id;
-    renderStudents();
-    loadActiveIntoForm();
+    activeId=myStudents[0].id;
+    renderStudents(); loadActiveIntoForm();
   }
-
   function activeStudent(){ return myStudents.find(s=>s.id===activeId); }
-
   function renderStudents(){
     const el=$("students");
-    let html = myStudents.map(s=>{
-      const label = s.name ? esc(s.name) : "（未命名）";
-      const active = s.id===activeId ? "active" : "";
-      return `<button class="stud-chip ${active}" data-id="${s.id}" type="button">
-        ${label}${s._unsaved?" •":""}
-        <span class="x" data-del="${s.id}" title="刪除這位學員">✕</span>
-      </button>`;
+    let html=myStudents.map(s=>{
+      const label=s.name?esc(s.name):"（未命名）";
+      return `<button class="stud-chip ${s.id===activeId?'active':''}" data-id="${s.id}" type="button">${label}${s._unsaved?" •":""}<span class="x" data-del="${s.id}" title="刪除">✕</span></button>`;
     }).join("");
-    html += `<button class="stud-chip add" id="addStud" type="button">＋ 新增學員</button>`;
-    el.innerHTML = html;
-
-    el.querySelectorAll(".stud-chip[data-id]").forEach(btn=>{
-      btn.addEventListener("click", (e)=>{
-        if(e.target.dataset.del) return; // 交給刪除處理
-        switchStudent(btn.dataset.id);
-      });
-    });
-    el.querySelectorAll(".x[data-del]").forEach(x=>{
-      x.addEventListener("click", (e)=>{ e.stopPropagation(); deleteStudent(x.dataset.del); });
-    });
+    html+=`<button class="stud-chip add" id="addStud" type="button">＋ 新增學員</button>`;
+    el.innerHTML=html;
+    el.querySelectorAll(".stud-chip[data-id]").forEach(btn=> btn.addEventListener("click",(e)=>{ if(e.target.dataset.del)return; switchStudent(btn.dataset.id); }));
+    el.querySelectorAll(".x[data-del]").forEach(x=> x.addEventListener("click",(e)=>{ e.stopPropagation(); deleteStudent(x.dataset.del); }));
     $("addStud").addEventListener("click", addStudent);
-
-    const count = myStudents.length;
-    $("studHint").textContent = count>1
-      ? `這個帳號目前有 ${count} 位學員。切換不同學員前，記得先按下方「儲存這位學員」。`
-      : "需要幫第二位小孩填寫嗎？按「＋ 新增學員」即可。";
+    const c=myStudents.length;
+    $("studHint").textContent = c>1 ? `這個帳號目前有 ${c} 位學員。切換前記得先儲存。` : "需要幫第二位小孩填寫嗎？按「＋ 新增學員」即可。";
   }
-
   function loadActiveIntoForm(){
-    const s=activeStudent();
-    responses = s.responses;
-    $("nameInput").value = s.name||"";
-    $("commentInput").value = s.comment||"";
+    const s=activeStudent(); responses=s.responses;
+    $("nameInput").value=s.name||""; $("commentInput").value=s.comment||"";
     $("toast").className="toast"; $("toast").textContent="";
-    repaintAll();
+    repaintAll(); updateMyStats();
   }
-
-  // 把畫面上目前輸入暫存回 active 物件（切換/新增前呼叫，避免遺失）
-  function stashForm(){
-    const s=activeStudent(); if(!s) return;
-    s.name = $("nameInput").value.trim();
-    s.comment = $("commentInput").value.trim();
-    // responses 是同一個物件參照，已即時更新
-  }
-
-  function switchStudent(id){
-    if(id===activeId) return;
-    stashForm();
-    activeId=id;
-    renderStudents();
-    loadActiveIntoForm();
-  }
-
-  function addStudent(){
-    stashForm();
-    const s={ id:newId(), name:"", responses:{}, comment:"", _unsaved:true };
-    myStudents.push(s);
-    activeId=s.id;
-    renderStudents();
-    loadActiveIntoForm();
-    $("nameInput").focus();
-  }
-
+  function stashForm(){ const s=activeStudent(); if(!s)return; s.name=$("nameInput").value.trim(); s.comment=$("commentInput").value.trim(); }
+  function switchStudent(id){ if(id===activeId)return; stashForm(); activeId=id; renderStudents(); loadActiveIntoForm(); }
+  function addStudent(){ stashForm(); const s={id:newId(),name:"",responses:{},comment:"",_unsaved:true}; myStudents.push(s); activeId=s.id; renderStudents(); loadActiveIntoForm(); $("nameInput").focus(); }
   async function deleteStudent(id){
-    const s=myStudents.find(x=>x.id===id); if(!s) return;
-    const label = s.name||"這位未命名學員";
-    if(!confirm(`確定要刪除「${label}」的填寫嗎？此動作無法復原。`)) return;
-    if(!s._unsaved){
-      try{ await deleteDoc(doc(db,"submissions",id)); }
-      catch(e){ alert("刪除失敗："+(e.code||e.message)); return; }
-    }
-    myStudents = myStudents.filter(x=>x.id!==id);
-    if(myStudents.length===0){
-      const ns={ id:newId(), name: currentUser.displayName||"", responses:{}, comment:"", _unsaved:true };
-      myStudents.push(ns);
-    }
-    activeId = myStudents[0].id;
-    renderStudents();
-    loadActiveIntoForm();
+    const s=myStudents.find(x=>x.id===id); if(!s)return;
+    if(!confirm(`確定要刪除「${s.name||"這位未命名學員"}」的填寫嗎？此動作無法復原。`))return;
+    if(!s._unsaved){ try{ await deleteDoc(doc(db,"submissions",id)); }catch(e){ alert("刪除失敗："+(e.code||e.message)); return; } }
+    myStudents=myStudents.filter(x=>x.id!==id);
+    if(myStudents.length===0) myStudents.push({id:newId(),name:currentUser.displayName||"",responses:{},comment:"",_unsaved:true});
+    activeId=myStudents[0].id; renderStudents(); loadActiveIntoForm();
   }
 
   /* ---------- 月曆 ---------- */
@@ -492,10 +467,7 @@
     MONTHS.forEach(({m,label,en})=>{
       const sec=document.createElement("div"); sec.className="month";
       let html=`<div class="month-h">${label} <em>${en} ${YEAR}</em>
-        <span class="mq">
-          <button class="qbtn mini-q yes-q" data-q="yes" data-month="${m+1}">本月全部參加</button>
-          <button class="qbtn mini-q no-q" data-q="no" data-month="${m+1}">本月全部不參加</button>
-        </span></div>`;
+        <span class="mq"><button class="qbtn mini-q yes-q" data-q="yes" data-month="${m+1}">本月全部出席</button></span></div>`;
       html+=`<div class="dow">`+DOW.map((d,i)=>`<div class="${i===0?'sun-h':''}">${d}</div>`).join("")+`</div>`;
       html+=`<div class="grid">`;
       const first=new Date(YEAR,m,1).getDay();
@@ -503,27 +475,37 @@
       const total=daysIn(m);
       for(let d=1;d<=total;d++){
         const dow=new Date(YEAR,m,d).getDay(), dk=dateKey(m,d);
-        if(dow===0){
+        if(isSchoolStart(m,d)){
+          html+=`<div class="cell school"><div class="date">${d}<span class="wd">${WD[dow]}</span></div><div class="school-tag">開學日</div></div>`;
+        }else if(dow===0){
           html+=`<div class="cell rest"><div class="date">${d}<span class="wd">${WD[dow]}</span></div><div class="rest-tag">休息</div></div>`;
         }else{
-          html+=`<div class="cell"><div class="date">${d}<span class="wd">${WD[dow]}</span></div>
-            <div class="sess">
-              <button class="pill" data-key="${dk}_am" data-sess="am" type="button"><span class="ic"></span>${SESS_SHORT.am}</button>
-              <button class="pill" data-key="${dk}_pm" data-sess="pm" type="button"><span class="ic"></span>${SESS_SHORT.pm}</button>
-            </div></div>`;
+          let pills="";
+          ["am","pm"].forEach(sess=>{
+            const key=dk+"_"+sess; const v=venueOfKey(key); const vc=venueClass(v);
+            pills+=`<button class="pill" data-key="${key}" type="button">
+              <span class="top"><span class="ic"></span>${SESS_SHORT[sess]}</span>
+              <span class="venue ${vc}">${v}</span></button>`;
+          });
+          html+=`<div class="cell"><div class="date">${d}<span class="wd">${WD[dow]}</span></div><div class="sess">${pills}</div></div>`;
         }
       }
       html+=`</div>`; sec.innerHTML=html; root.appendChild(sec);
     });
-    root.querySelectorAll(".pill").forEach(p=> p.addEventListener("click", ()=>cyclePill(p)));
+    root.querySelectorAll(".pill").forEach(p=> p.addEventListener("click", ()=>togglePill(p)));
     root.querySelectorAll(".mini-q").forEach(b=> b.addEventListener("click", ()=>quick(b.dataset.q, parseInt(b.dataset.month,10))));
   }
   function paintPill(p){
-    const s=responses[p.dataset.key]; const ic=p.querySelector(".ic"); const base=SESS_SHORT[p.dataset.sess];
-    if(s){ p.setAttribute("data-s",s); ic.textContent=ICON[s]; } else { p.removeAttribute("data-s"); ic.textContent=""; }
-    p.childNodes.forEach(n=>{ if(n.nodeType===3) n.textContent=base; });
+    const on = responses[p.dataset.key]==="yes";
+    const ic = p.querySelector(".ic");
+    if(on){ p.setAttribute("data-on","1"); ic.textContent="✓"; }
+    else { p.removeAttribute("data-on"); ic.textContent=""; }
   }
-  function cyclePill(p){ const k=p.dataset.key, next=ORDER[responses[k]||null]; if(next) responses[k]=next; else delete responses[k]; paintPill(p); }
+  function togglePill(p){
+    const k=p.dataset.key;
+    if(responses[k]==="yes") delete responses[k]; else responses[k]="yes";
+    paintPill(p); updateMyStats();
+  }
   function repaintAll(){ document.querySelectorAll(".pill").forEach(paintPill); }
   function quick(action, month){
     document.querySelectorAll(".pill").forEach(p=>{
@@ -531,66 +513,79 @@
       if(action==="clear"){ delete responses[k]; return; }
       const mm=parseInt(k.split("-")[1],10);
       if(month && mm!==month) return;
-      if(action==="yes") responses[k]="yes"; else if(action==="no") responses[k]="no";
+      if(action==="yes") responses[k]="yes";
     });
-    repaintAll();
+    repaintAll(); updateMyStats();
   }
 
-  /* ---------- 儲存目前學員 ---------- */
+  /* ---------- 個人即時統計 ---------- */
+  function tallyResponses(resp){
+    let jul=0,aug=0,long=0,yong=0;
+    Object.keys(resp||{}).forEach(k=>{
+      if(resp[k]!=="yes") return;
+      const mm=parseInt(k.split("-")[1],10);
+      if(mm===7)jul++; else if(mm===8)aug++;
+      if(venueOfKey(k)==="龍門")long++; else yong++;
+    });
+    return {jul,aug,long,yong,total:jul+aug};
+  }
+  function updateMyStats(){
+    const t=tallyResponses(responses);
+    $("msJul").textContent=t.jul; $("msAug").textContent=t.aug;
+    $("msLong").textContent=t.long; $("msYong").textContent=t.yong;
+  }
+
+  /* ---------- 儲存 ---------- */
   async function submit(){
     const toast=$("toast");
     if(!currentUser){ toast.className="toast err"; toast.textContent="請先登入。"; return; }
     stashForm();
     const s=activeStudent();
     if(!s.name){ toast.className="toast err"; toast.textContent="請先輸入學員姓名。"; $("nameInput").focus(); return; }
-    if(Object.keys(s.responses).length===0){ toast.className="toast err"; toast.textContent="請至少勾選一個場次的意願再儲存。"; return; }
+    if(Object.keys(s.responses).length===0){ toast.className="toast err"; toast.textContent="請至少勾選一個會出席的場次再儲存。"; return; }
     try{
       await setDoc(doc(db,"submissions",s.id), {
-        ownerUid: currentUser.uid,
-        ownerEmail: currentUser.email||"",
-        name: s.name, responses:{...s.responses}, comment:s.comment,
-        updatedAt: serverTimestamp()
+        ownerUid:currentUser.uid, ownerEmail:currentUser.email||"",
+        name:s.name, responses:{...s.responses}, comment:s.comment, updatedAt:serverTimestamp()
       });
-      s._unsaved=false;
-      renderStudents();
+      s._unsaved=false; renderStudents();
+      const t=tallyResponses(s.responses);
       toast.className="toast ok";
-      toast.textContent=`已儲存「${s.name}」，共 ${Object.keys(s.responses).length} 個場次。`;
+      toast.textContent=`已儲存「${s.name}」：七月 ${t.jul} 場、八月 ${t.aug} 場，共 ${t.total} 場。`;
       if(isAdmin){ await loadAll(); renderSummary(); }
     }catch(e){ toast.className="toast err"; toast.textContent="儲存失敗："+(e.code||e.message||"請稍後再試"); }
   }
 
-  /* ---------- 管理員：全部 ---------- */
+  /* ---------- 管理員 ---------- */
   async function loadAll(){
     allSubs=[];
     try{ const qs=await getDocs(collection(db,"submissions")); allSubs=qs.docs.map(d=>d.data()); }catch(e){ allSubs=[]; }
-    allSubs.sort((a,b)=>{
-      const ta=a.updatedAt&&a.updatedAt.seconds?a.updatedAt.seconds:0;
-      const tb=b.updatedAt&&b.updatedAt.seconds?b.updatedAt.seconds:0; return tb-ta;
-    });
+    allSubs.sort((a,b)=>{ const ta=a.updatedAt&&a.updatedAt.seconds?a.updatedAt.seconds:0, tb=b.updatedAt&&b.updatedAt.seconds?b.updatedAt.seconds:0; return tb-ta; });
   }
   function renderSummary(){ renderStats(); renderRoster(); renderDaily(); }
-  function countByStatus(){ let yes=0,no=0; allSubs.forEach(s=>Object.values(s.responses||{}).forEach(v=>{ if(v==="yes")yes++; else if(v==="no")no++; })); return {yes,no}; }
   function renderStats(){
-    const c=countByStatus();
+    let attend=0; allSubs.forEach(s=>Object.values(s.responses||{}).forEach(v=>{ if(v==="yes")attend++; }));
     $("statRow").innerHTML=`
       <div class="stat"><div class="num">${allSubs.length}</div><div class="lbl">已填寫學員數</div></div>
-      <div class="stat"><div class="num">${c.yes}</div><div class="lbl">「參加」場次總數</div></div>
-      <div class="stat"><div class="num">${c.no}</div><div class="lbl">「不參加」場次總數</div></div>`;
+      <div class="stat"><div class="num">${attend}</div><div class="lbl">出席場次總數</div></div>`;
   }
   function renderRoster(){
     const el=$("roster");
     if(allSubs.length===0){ el.innerHTML=`<div class="empty-state"><div class="big">🏊</div>目前還沒有人填寫。</div>`; return; }
     el.innerHTML=allSubs.map(s=>{
-      const vals=Object.values(s.responses||{});
-      const y=vals.filter(v=>v==="yes").length, n=vals.filter(v=>v==="no").length;
-      let tStr=""; if(s.updatedAt&&s.updatedAt.seconds){ const t=new Date(s.updatedAt.seconds*1000); tStr=`${t.getFullYear()}/${t.getMonth()+1}/${t.getDate()} ${pad(t.getHours())}:${pad(t.getMinutes())}`; }
+      const t=tallyResponses(s.responses);
+      let tStr=""; if(s.updatedAt&&s.updatedAt.seconds){ const dt=new Date(s.updatedAt.seconds*1000); tStr=`${dt.getFullYear()}/${dt.getMonth()+1}/${dt.getDate()} ${pad(dt.getHours())}:${pad(dt.getMinutes())}`; }
       const cmt=s.comment?`<div class="cmt">💬 ${esc(s.comment)}</div>`:"";
       return `<div class="person">
         <div class="avatar">${esc((s.name||"?")[0]).toUpperCase()}</div>
         <div class="info"><div class="nm">${esc(s.name||"（未填名）")}</div>
           <div class="tm">填寫帳號：${esc(s.ownerEmail||"")}${tStr?" · "+tStr:""}</div></div>
-        <div class="tally"><span class="tag y">參加 ${y}</span><span class="tag n">不參加 ${n}</span></div>
-        ${cmt}</div>`;
+        <div class="tally">
+          <span class="tag jul">七月 ${t.jul}</span>
+          <span class="tag aug">八月 ${t.aug}</span>
+          <span class="tag vl">龍門 ${t.long}</span>
+          <span class="tag vy">永運 ${t.yong}</span>
+        </div>${cmt}</div>`;
     }).join("");
   }
   function renderDaily(){
@@ -603,12 +598,13 @@
       html+=`<tr class="wk-divider"><td colspan="4">${label}</td></tr>`;
       const total=daysIn(m);
       for(let d=1;d<=total;d++){
-        if(isRest(m,d)) continue;
+        if(!isTrainingDay(m,d)) continue;
         const dk=dateKey(m,d), dow=new Date(YEAR,m,d).getDay();
         const am=tally[dk+"_am"]||0, pm=tally[dk+"_pm"]||0;
+        const va=venueOfKey(dk+"_am"), vp=venueOfKey(dk+"_pm");
         html+=`<tr><td class="d">${m+1}/${d}</td><td>${WD[dow]}</td>
-          <td><span class="mini ${am?'has':'zero'}">${am}</span></td>
-          <td><span class="mini ${pm?'has':'zero'}">${pm}</span></td></tr>`;
+          <td><span class="mini ${am?'has':'zero'}">${am}</span><span class="vbadge ${venueClass(va)}">${va}</span></td>
+          <td><span class="mini ${pm?'has':'zero'}">${pm}</span><span class="vbadge ${venueClass(vp)}">${vp}</span></td></tr>`;
       }
     });
     html+=`</tbody></table>`; el.innerHTML=html;
@@ -623,31 +619,37 @@
   }
   function exportDetail(){
     if(allSubs.length===0){ alert("目前沒有任何填寫資料可匯出。"); return; }
-    const rows=[["學員姓名","填寫帳號","日期","星期","場次","出席意願","其他意見"]];
+    const rows=[["學員姓名","填寫帳號","日期","星期","場次","地點","其他意見"]];
     allSubs.forEach(s=>{
       let first=true;
       Object.entries(s.responses||{}).forEach(([k,v])=>{
+        if(v!=="yes") return;
         const [date,sess]=k.split("_"); const dt=new Date(date+"T00:00:00");
-        rows.push([s.name||"", s.ownerEmail||"", date, WD[dt.getDay()], SESS_LABEL[sess]||sess, LABEL[v]||v, first?(s.comment||""):""]);
+        rows.push([s.name||"", s.ownerEmail||"", date, WD[dt.getDay()], SESS_LABEL[sess]||sess, venueOfKey(k), first?(s.comment||""):""]);
         first=false;
       });
     });
-    download(`游泳訓練出席意願_明細_${stamp()}.csv`, rows);
+    download(`游泳訓練出席_明細_${stamp()}.csv`, rows);
+  }
+  function exportMonthly(){
+    if(allSubs.length===0){ alert("目前沒有任何填寫資料可匯出。"); return; }
+    const rows=[["學員姓名","填寫帳號","七月出席場次","八月出席場次","合計","龍門場次","永運場次"]];
+    allSubs.forEach(s=>{ const t=tallyResponses(s.responses); rows.push([s.name||"", s.ownerEmail||"", t.jul, t.aug, t.total, t.long, t.yong]); });
+    download(`游泳訓練出席_個人月統計_${stamp()}.csv`, rows);
   }
   function exportSummary(){
     if(allSubs.length===0){ alert("目前沒有任何填寫資料可匯出。"); return; }
-    const tY={},tN={};
-    allSubs.forEach(s=>Object.entries(s.responses||{}).forEach(([k,v])=>{ if(v==="yes")tY[k]=(tY[k]||0)+1; if(v==="no")tN[k]=(tN[k]||0)+1; }));
-    const rows=[["日期","星期","場次","參加人數","不參加人數"]];
+    const tY={}; allSubs.forEach(s=>Object.entries(s.responses||{}).forEach(([k,v])=>{ if(v==="yes")tY[k]=(tY[k]||0)+1; }));
+    const rows=[["日期","星期","場次","地點","出席人數"]];
     MONTHS.forEach(({m})=>{
       const total=daysIn(m);
       for(let d=1;d<=total;d++){
-        if(isRest(m,d)) continue;
+        if(!isTrainingDay(m,d)) continue;
         const dk=dateKey(m,d), dow=new Date(YEAR,m,d).getDay();
-        ["am","pm"].forEach(sess=> rows.push([dk, WD[dow], SESS_LABEL[sess], tY[dk+"_"+sess]||0, tN[dk+"_"+sess]||0]));
+        ["am","pm"].forEach(sess=>{ const key=dk+"_"+sess; rows.push([dk, WD[dow], SESS_LABEL[sess], venueOfKey(key), tY[key]||0]); });
       }
     });
-    download(`游泳訓練出席意願_每日彙總_${stamp()}.csv`, rows);
+    download(`游泳訓練出席_每日彙總_${stamp()}.csv`, rows);
   }
   function stamp(){ const d=new Date(); return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}`; }
 
@@ -663,11 +665,12 @@
   $("clearBtn").addEventListener("click", ()=>quick("clear"));
   $("submitBtn").addEventListener("click", submit);
   $("exportBtn").addEventListener("click", exportDetail);
+  $("exportMonthBtn").addEventListener("click", exportMonthly);
   $("exportSumBtn").addEventListener("click", exportSummary);
   $("refreshBtn").addEventListener("click", async ()=>{ await loadAll(); renderSummary(); });
 
   buildCalendars();
-  repaintAll();
+  repaintAll(); updateMyStats();
 </script>
 </body>
 </html>
