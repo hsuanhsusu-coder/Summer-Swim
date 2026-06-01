@@ -322,8 +322,8 @@
     <!-- ===== 管理員 ===== -->
     <section class="panel" id="panel-admin">
       <div class="subtabs">
-        <button class="subtab active" data-sub="bind">👨‍👩‍👧 名單與家長綁定</button>
-        <button class="subtab" data-sub="summary">📊 出席彙總與匯出</button>
+        <button class="subtab active" data-sub="bind" id="subtabBind">👨‍👩‍👧 名單與家長綁定</button>
+        <button class="subtab" data-sub="summary" id="subtabSummary">📊 出席彙總與匯出</button>
       </div>
 
       <!-- 名單與綁定 -->
@@ -397,8 +397,11 @@
     messagingSenderId: "890910687436",
     appId: "1:890910687436:web:e9bd3c70654595db6d4269"
   };
-  /* ★ 管理員 Email（可多個） */
+  /* ★ 管理員 Email（完整權限：可綁定、增減、匯出，可多個） */
   const ADMIN_EMAILS = ["huichungw@gmail.com"];
+  /* ★ 副管理員 Email（唯讀：只能看彙總與匯出，不能改名單/綁定，可多個）
+     例如：["vice1@gmail.com", "vice2@gmail.com"] */
+  const VIEWER_EMAILS = ["vanessa2373.annie@gmail.com"];
   /* ═══════════════════════════════ */
 
   /* ★ 內建龍門隊員名單（依原始順序；之後增減用管理員介面，不動此處） */
@@ -450,7 +453,7 @@
   function venueOfKey(key){ const [date,sess]=key.split("_"); const p=date.split("-"); const mm=+p[1],d=+p[2]; if(sess==="pm")return "永運"; return (LONG_AM_DAYS[mm]||[]).includes(d)?"龍門":"永運"; }
   const venueClass=v=>v==="龍門"?"vl":"vy";
 
-  let currentUser=null, isAdmin=false;
+  let currentUser=null, isAdmin=false, isViewer=false;
   let allStudents=[];          // 管理員：全部
   let myStudents=[];           // 家長：被指派的
   let activeId=null, responses={};
@@ -470,16 +473,27 @@
     currentUser=user;
     if(!user){ showLogin(); return; }
     isAdmin=ADMIN_EMAILS.map(lc).includes(lc(user.email));
+    isViewer=!isAdmin && VIEWER_EMAILS.map(lc).includes(lc(user.email));
     showApp(user);
-    if(isAdmin){ await loadAllStudents(); renderBindUI(); renderSummary(); }
+    if(isAdmin || isViewer){ await loadAllStudents(); renderBindUI(); renderSummary(); }
     await loadMyStudents();
   });
   function showLogin(){ $("loginCard").style.display="block"; $("appShell").style.display="none"; $("authBar").style.display="none"; }
   function showApp(user){
     $("loginCard").style.display="none"; $("appShell").style.display="block"; $("authBar").style.display="flex";
     $("whoText").innerHTML=`以 <small>${esc(user.email||"")}</small> 登入中`;
-    $("adminBadge").style.display=isAdmin?"inline-block":"none";
-    $("tabAdmin").style.display=isAdmin?"inline-block":"none";
+    const badge=$("adminBadge");
+    if(isAdmin){ badge.style.display="inline-block"; badge.textContent="管理員"; }
+    else if(isViewer){ badge.style.display="inline-block"; badge.textContent="副管理員（唯讀）"; }
+    else { badge.style.display="none"; }
+    $("tabAdmin").style.display=(isAdmin||isViewer)?"inline-block":"none";
+    if(isViewer){
+      // 副管理員：藏掉「名單與家長綁定」子分頁，只留彙總與匯出
+      $("subtabBind").style.display="none";
+      $("sub-bind").classList.remove("show");
+      $("subtabSummary").classList.add("active");
+      $("sub-summary").classList.add("show");
+    }
   }
   $("loginBtn").addEventListener("click", async ()=>{ const t=$("loginToast");
     try{ await signInWithPopup(auth,provider); }catch(e){ t.className="toast err"; t.textContent="登入未完成："+(e.code||e.message)+"。"; } });
@@ -668,6 +682,7 @@
   }
 
   function renderBindUI(){
+    if(!isAdmin) return;   // 只有正管理員需要綁定介面
     const hasRoster=allStudents.length>0;
     $("initCard").style.display=hasRoster?"none":"block";
     $("bindCard").style.display=hasRoster?"block":"none";
