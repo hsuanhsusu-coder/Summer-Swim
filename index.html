@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 暑期游泳訓練 · 出席意願調查</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,500&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pool-deep:#0a4f5e; --pool:#13a3b8; --pool-bright:#2bc4d6;
+    --pool-light:#d6f2f5; --pool-mist:#eef9fa; --sun:#ffb02e; --coral:#ff6f5e;
+    --ink:#082a31; --ink-soft:#3c6068;
+    --yes:#0f9d8f; --yes-soft:#d4f3ef; --no:#ef5d4a; --no-soft:#fcdcd6;
+    --line:#cfe6e9; --shadow:0 18px 45px -22px rgba(8,42,49,.45);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{font-family:"Noto Sans TC",system-ui,sans-serif;color:var(--ink);
+    background:radial-gradient(circle at 12% -5%, #fff5dd 0%, transparent 42%),
+      radial-gradient(circle at 92% 0%, #d6f2f5 0%, transparent 45%),
+      linear-gradient(180deg,#eef9fa 0%, #f9fdfd 60%);
+    background-attachment:fixed;min-height:100vh;line-height:1.55;padding:clamp(14px,3vw,40px)}
+  .wrap{max-width:1040px;margin:0 auto}
+
+  header{position:relative;background:linear-gradient(135deg,var(--pool-deep) 0%, var(--pool) 78%);
+    color:#fff;border-radius:26px;padding:clamp(26px,5vw,46px) clamp(22px,5vw,48px) clamp(58px,7vw,72px);
+    overflow:hidden;box-shadow:var(--shadow)}
+  header::after{content:"";position:absolute;left:0;right:0;bottom:0;height:34px;
+    background:repeating-linear-gradient(90deg,rgba(255,255,255,.85) 0 26px, transparent 26px 46px);opacity:.5}
+  .sun{position:absolute;top:-50px;right:-30px;width:170px;height:170px;border-radius:50%;
+    background:radial-gradient(circle at 50% 50%, var(--sun) 0%, #ff9d2e 60%, transparent 72%);opacity:.7;filter:blur(2px)}
+  .eyebrow{font-size:.78rem;letter-spacing:.34em;text-transform:uppercase;font-weight:700;color:var(--pool-light);margin-bottom:14px}
+  h1{font-family:"Fraunces",serif;font-weight:900;font-size:clamp(2.1rem,6vw,3.5rem);line-height:1.02;letter-spacing:-.01em;margin-bottom:6px}
+  h1 .yr{font-style:italic;font-weight:500;color:var(--sun)}
+  .sub{font-size:clamp(1rem,2.4vw,1.18rem);color:#e8fbfc;font-weight:500;max-width:34ch}
+  .meta{margin-top:18px;display:flex;flex-wrap:wrap;gap:8px}
+  .chip{font-size:.82rem;font-weight:500;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);color:#fff;padding:5px 13px;border-radius:999px;backdrop-filter:blur(4px)}
+
+  /* 帳號列 */
+  .authbar{display:none;align-items:center;gap:12px;flex-wrap:wrap;margin:18px 2px 0;font-size:.9rem;color:var(--ink-soft)}
+  .authbar .who{font-weight:700;color:var(--pool-deep)}
+  .authbar .who small{font-weight:500;color:var(--ink-soft)}
+  .authbar .badge-admin{background:var(--sun);color:#3a2700;font-weight:900;font-size:.72rem;padding:2px 9px;border-radius:999px}
+  .linkbtn{margin-left:auto;font-family:inherit;font-size:.85rem;font-weight:700;cursor:pointer;border:1.5px solid var(--line);background:#fff;color:var(--ink-soft);padding:7px 15px;border-radius:999px;transition:.15s}
+  .linkbtn:hover{border-color:var(--coral);color:var(--coral)}
+
+  /* 登入畫面 */
+  .login-card{display:none;background:#fff;border-radius:22px;box-shadow:var(--shadow);border:1px solid #eaf5f6;
+    padding:clamp(34px,6vw,56px) clamp(22px,5vw,40px);margin-top:22px;text-align:center}
+  .login-card .ic{font-size:3rem;margin-bottom:10px}
+  .login-card h2{font-family:"Fraunces",serif;font-weight:600;font-size:1.7rem;color:var(--pool-deep);margin-bottom:8px}
+  .login-card p{color:var(--ink-soft);font-size:.96rem;max-width:36ch;margin:0 auto 26px}
+  .gbtn{display:inline-flex;align-items:center;gap:11px;font-family:inherit;font-size:1rem;font-weight:700;cursor:pointer;
+    background:#fff;color:#3c4043;border:1.5px solid #dadce0;border-radius:13px;padding:13px 26px;transition:.18s}
+  .gbtn:hover{box-shadow:0 4px 14px rgba(60,64,67,.18);border-color:#cdd1d6}
+  .gbtn svg{width:20px;height:20px}
+  .login-card .small{font-size:.82rem;color:var(--ink-soft);margin-top:18px;max-width:40ch}
+
+  .tabs{display:flex;gap:8px;margin:26px 0 18px;flex-wrap:wrap}
+  .tab{font-family:inherit;font-size:.96rem;font-weight:700;cursor:pointer;border:1.5px solid var(--line);background:#fff;color:var(--ink-soft);padding:10px 20px;border-radius:999px;transition:.18s}
+  .tab:hover{border-color:var(--pool-bright);color:var(--pool-deep)}
+  .tab.active{background:var(--pool-deep);color:#fff;border-color:var(--pool-deep)}
+  #tabAdmin{display:none}
+
+  #appShell{display:none}
+  .panel{display:none;animation:fade .35s ease}
+  .panel.show{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  .card{background:#fff;border-radius:20px;padding:clamp(18px,3.4vw,30px);box-shadow:var(--shadow);border:1px solid #eaf5f6;margin-bottom:18px}
+  .card h2{font-family:"Fraunces",serif;font-weight:600;font-size:1.4rem;color:var(--pool-deep);margin-bottom:4px;display:flex;align-items:center;gap:9px}
+  .card h2 .n{font-size:.85rem;font-family:"Noto Sans TC";font-weight:900;color:#fff;background:var(--pool);width:26px;height:26px;border-radius:50%;display:grid;place-items:center;flex:none}
+  .card p.lead{color:var(--ink-soft);font-size:.94rem;margin-bottom:18px}
+
+  .field{margin-bottom:4px}
+  .field label{display:block;font-weight:700;font-size:.92rem;margin-bottom:7px;color:var(--ink)}
+  .field input,.field textarea{width:100%;font-family:inherit;font-size:1.05rem;padding:13px 16px;border:1.5px solid var(--line);border-radius:13px;background:var(--pool-mist);transition:.18s;color:var(--ink)}
+  .field textarea{resize:vertical;min-height:90px;line-height:1.6}
+  .field input:focus,.field textarea:focus{outline:none;border-color:var(--pool-bright);background:#fff;box-shadow:0 0 0 4px var(--pool-light)}
+
+  .legend{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:6px 0 8px}
+  .legend .lab{font-size:.85rem;font-weight:700;color:var(--ink-soft)}
+  .key{display:inline-flex;align-items:center;gap:6px;font-size:.82rem;font-weight:500}
+  .dot{width:15px;height:15px;border-radius:5px;display:inline-block}
+  .dot.y{background:var(--yes)} .dot.n{background:var(--no)} .dot.e{background:#e7eef0;border:1px solid var(--line)}
+
+  .quick{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 4px;align-items:center}
+  .quick .qlab{font-size:.82rem;font-weight:700;color:var(--ink-soft)}
+  .quick .qnote{font-size:.8rem;color:var(--ink-soft)}
+  .qbtn{font-family:inherit;font-size:.82rem;font-weight:600;cursor:pointer;border:1.5px solid var(--line);background:#fff;color:var(--ink-soft);padding:7px 13px;border-radius:9px;transition:.15s}
+  .qbtn:hover{border-color:var(--pool);color:var(--pool-deep);background:var(--pool-mist)}
+  .qbtn.clear:hover{border-color:var(--no);color:var(--no);background:var(--no-soft)}
+  .qbtn.mini-q{font-size:.76rem;padding:5px 11px}
+  .qbtn.yes-q:hover{border-color:var(--yes);color:var(--yes);background:var(--yes-soft)}
+  .qbtn.no-q:hover{border-color:var(--no);color:var(--no);background:var(--no-soft)}
+
+  .month{margin-top:26px}
+  .month-h{font-family:"Fraunces",serif;font-weight:600;font-size:1.5rem;color:var(--pool-deep);margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-bottom:2px dashed var(--line);padding-bottom:9px}
+  .month-h em{font-style:normal;font-size:.82rem;font-weight:500;color:var(--ink-soft);font-family:"Noto Sans TC"}
+  .month-h .mq{margin-left:auto;display:flex;gap:7px;flex-wrap:wrap}
+  .dow{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:6px}
+  .dow div{text-align:center;font-size:.74rem;font-weight:700;color:var(--ink-soft);padding:2px}
+  .dow div.sun-h{color:#b6c4c7}
+  .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+  .cell{background:var(--pool-mist);border:1px solid #e3f1f2;border-radius:11px;padding:6px 4px 7px;min-height:74px;display:flex;flex-direction:column}
+  .cell.empty{background:transparent;border:none}
+  .cell.rest{background:#f1f4f5;border:1px dashed #d3dee0}
+  .date{font-weight:900;font-size:.92rem;line-height:1;margin-bottom:auto}
+  .date .wd{font-size:.62rem;font-weight:500;color:var(--ink-soft);margin-left:3px}
+  .rest-tag{margin-top:auto;text-align:center;font-size:.72rem;font-weight:700;color:#aebbbe;padding-bottom:4px}
+  .sess{display:flex;flex-direction:column;gap:4px;margin-top:5px}
+  .pill{font-family:inherit;cursor:pointer;border:none;border-radius:7px;padding:5px 4px;font-size:.72rem;font-weight:700;color:var(--ink-soft);background:#e7eef0;display:flex;align-items:center;justify-content:center;gap:3px;transition:.13s;user-select:none;line-height:1}
+  .pill:hover{filter:brightness(.97);transform:translateY(-1px)}
+  .pill .ic{font-size:.7rem}
+  .pill[data-s="yes"]{background:var(--yes);color:#fff}
+  .pill[data-s="no"]{background:var(--no);color:#fff}
+
+  .submit-row{margin-top:6px;display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .btn{font-family:inherit;font-size:1rem;font-weight:700;cursor:pointer;border:none;border-radius:13px;padding:15px 30px;transition:.18s}
+  .btn-primary{background:var(--pool-deep);color:#fff;box-shadow:0 10px 22px -10px var(--pool-deep)}
+  .btn-primary:hover{background:#073f4b;transform:translateY(-2px)}
+  .btn-ghost{background:#fff;color:var(--pool-deep);border:1.5px solid var(--line)}
+  .btn-ghost:hover{border-color:var(--pool);background:var(--pool-mist)}
+  .hint{font-size:.85rem;color:var(--ink-soft)}
+  .toast{margin-top:14px;padding:13px 18px;border-radius:12px;font-weight:600;font-size:.92rem;display:none}
+  .toast.ok{display:block;background:var(--yes-soft);color:#0a6b60;border:1px solid #9fe0d6}
+  .toast.err{display:block;background:var(--no-soft);color:#a83523;border:1px solid #f2b3a8}
+
+  .stat-row{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:22px}
+  .stat{flex:1;min-width:130px;background:var(--pool-mist);border:1px solid #e3f1f2;border-radius:15px;padding:16px 18px}
+  .stat .num{font-family:"Fraunces",serif;font-weight:900;font-size:2.1rem;color:var(--pool-deep);line-height:1}
+  .stat .lbl{font-size:.82rem;color:var(--ink-soft);font-weight:500;margin-top:4px}
+  .roster{display:flex;flex-direction:column;gap:8px}
+  .person{display:flex;align-items:flex-start;gap:12px;padding:12px 15px;border-radius:12px;background:var(--pool-mist);border:1px solid #e3f1f2;flex-wrap:wrap}
+  .avatar{width:38px;height:38px;border-radius:50%;flex:none;display:grid;place-items:center;font-weight:900;color:#fff;background:var(--pool);font-size:1rem}
+  .person .info{flex:1;min-width:120px}
+  .person .nm{font-weight:700;font-size:.98rem}
+  .person .tm{font-size:.78rem;color:var(--ink-soft)}
+  .person .tally{display:flex;gap:6px;flex-wrap:wrap;font-size:.74rem;align-items:center}
+  .tag{padding:2px 8px;border-radius:7px;font-weight:700}
+  .tag.y{background:var(--yes-soft);color:#0a6b60}
+  .tag.n{background:var(--no-soft);color:#a83523}
+  .person .cmt{flex-basis:100%;font-size:.84rem;color:var(--ink-soft);background:#fff;border-left:3px solid var(--pool-bright);padding:7px 12px;border-radius:0 8px 8px 0;margin-top:2px}
+  .empty-state{text-align:center;color:var(--ink-soft);padding:36px 18px;font-size:.95rem}
+  .empty-state .big{font-size:2.4rem;margin-bottom:8px}
+
+  .daily{margin-top:6px;overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:.85rem;min-width:440px}
+  th,td{padding:8px 10px;text-align:center;border-bottom:1px solid var(--line)}
+  th{background:var(--pool-mist);font-weight:700;color:var(--pool-deep)}
+  td.d{text-align:left;font-weight:700;white-space:nowrap}
+  td .mini{display:inline-block;min-width:26px;padding:2px 7px;border-radius:6px;font-weight:700}
+  .mini.has{background:var(--yes-soft);color:#0a6b60}
+  .mini.zero{color:#b6c4c7}
+  .wk-divider td{background:#f3fafb;font-weight:900;color:var(--pool-deep);text-align:left}
+
+  .export-row{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:8px}
+  .note{font-size:.82rem;color:var(--ink-soft);background:var(--pool-mist);border-left:3px solid var(--pool);padding:11px 15px;border-radius:0 10px 10px 0;margin-top:6px}
+  footer{text-align:center;color:var(--ink-soft);font-size:.8rem;padding:24px 0 8px}
+
+  @media(max-width:560px){
+    .cell{min-height:66px;padding:5px 3px 6px}
+    .pill{font-size:.66rem;padding:5px 2px}
+    .date{font-size:.82rem}
+    .date .wd{display:none}
+    .month-h .mq{margin-left:0;width:100%}
+    .linkbtn{margin-left:0}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="sun"></div>
+    <div class="eyebrow">Summer Swim Program</div>
+    <h1><span class="yr">2026</span> 暑期游泳訓練</h1>
+    <div class="sub">晨訓 / 午訓 出席意願調查</div>
+    <div class="meta">
+      <span class="chip">📅 7月 &amp; 8月（每週日休息）</span>
+      <span class="chip">🏊 晨訓 · 午訓</span>
+      <span class="chip">🔐 Google 帳號登入</span>
+    </div>
+  </header>
+
+  <!-- 帳號列（登入後顯示） -->
+  <div class="authbar" id="authBar">
+    <span class="who" id="whoText"></span>
+    <span class="badge-admin" id="adminBadge" style="display:none">管理員</span>
+    <button class="linkbtn" id="logoutBtn">登出</button>
+  </div>
+
+  <!-- 登入畫面（未登入顯示） -->
+  <section class="login-card" id="loginCard">
+    <div class="ic">🏊</div>
+    <h2>請先登入</h2>
+    <p>請用你的 Google 帳號登入後填寫出席意願。每個帳號的填寫資料只有你自己與管理員看得到。</p>
+    <button class="gbtn" id="loginBtn">
+      <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      使用 Google 登入
+    </button>
+    <div class="toast" id="loginToast" style="text-align:left"></div>
+    <div class="small" id="loginSmall"></div>
+  </section>
+
+  <!-- 主畫面（登入後顯示） -->
+  <div id="appShell">
+    <div class="tabs">
+      <button class="tab active" data-tab="fill" id="tabFill">✍️ 填寫意願</button>
+      <button class="tab" data-tab="admin" id="tabAdmin">🔒 管理員專區</button>
+    </div>
+
+    <!-- 填寫面板 -->
+    <section class="panel show" id="panel-fill">
+      <div class="card">
+        <h2><span class="n">1</span>填寫人資訊</h2>
+        <p class="lead">系統已帶入你的帳號名稱，若實際學員姓名不同請直接修改。再次送出會更新先前的填寫。</p>
+        <div class="field">
+          <label for="nameInput">學員姓名</label>
+          <input id="nameInput" type="text" placeholder="例如：陳小魚" maxlength="40" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="n">2</span>勾選出席意願</h2>
+        <p class="lead">點一下每天的「晨」（晨訓）或「午」（午訓）即可切換：未填 → 參加 → 不參加。每週日為休息日，不安排訓練。</p>
+        <div class="legend">
+          <span class="lab">狀態：</span>
+          <span class="key"><span class="dot e"></span>未填</span>
+          <span class="key"><span class="dot y"></span>參加</span>
+          <span class="key"><span class="dot n"></span>不參加</span>
+        </div>
+        <div class="quick">
+          <span class="qlab">快速填入：</span>
+          <button class="qbtn clear" id="clearBtn">全部清空</button>
+          <span class="qnote">每個月可用下方標題旁的按鈕，一鍵把整月設為參加或不參加。</span>
+        </div>
+        <div id="calendars"></div>
+      </div>
+
+      <div class="card">
+        <h2><span class="n">3</span>其他意見</h2>
+        <p class="lead">若有想補充的事項（例如特定日期請假、希望調整時段等），請填在這裡（可留空）。</p>
+        <div class="field">
+          <label for="commentInput">其他意見（選填）</label>
+          <textarea id="commentInput" maxlength="500" placeholder="例如：7/20 那週要出國，無法參加。"></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="submit-row">
+          <button class="btn btn-primary" id="submitBtn">送出我的意願</button>
+          <span class="hint">送出後可隨時回來修改。</span>
+        </div>
+        <div class="toast" id="toast"></div>
+      </div>
+    </section>
+
+    <!-- 管理員面板 -->
+    <section class="panel" id="panel-admin">
+      <div class="card">
+        <h2>📊 整體彙總</h2>
+        <div class="stat-row" id="statRow"></div>
+        <div class="export-row">
+          <button class="btn btn-primary" id="exportBtn">⬇️ 匯出 CSV（明細）</button>
+          <button class="btn btn-ghost" id="exportSumBtn">⬇️ 匯出每日彙總 CSV</button>
+          <button class="btn btn-ghost" id="refreshBtn">🔄 重新整理</button>
+        </div>
+        <div class="note">
+          CSV 採 UTF-8 編碼並含 BOM，用 Excel 開啟中文不會亂碼。明細為「一列一場次」（姓名／Email／日期／星期／場次／意願／其他意見），方便匯入排程或點名系統。
+        </div>
+      </div>
+      <div class="card">
+        <h2>👥 已填寫名單</h2>
+        <div class="roster" id="roster"></div>
+      </div>
+      <div class="card">
+        <h2>📅 每日參加人數</h2>
+        <p class="lead">數字代表勾選「參加」的人數（已排除週日休息日）。</p>
+        <div class="daily" id="daily"></div>
+      </div>
+    </section>
+  </div>
+
+  <footer>採用 Google 帳號登入；每人一份、可隨時修改，出席名單與匯出僅管理員可見。</footer>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc, getDocs, collection, serverTimestamp }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  /* ════════════════════════════════════════════════════════
+     你的 Firebase 設定（已填入）
+     ════════════════════════════════════════════════════════ */
+  const firebaseConfig = {
+    apiKey: "AIzaSyCU6ZBOVid-aCcooxtYPlVPHLnLd_PRmzw",
+    authDomain: "summer-swim-2026.firebaseapp.com",
+    projectId: "summer-swim-2026",
+    storageBucket: "summer-swim-2026.firebasestorage.app",
+    messagingSenderId: "890910687436",
+    appId: "1:890910687436:web:e9bd3c70654595db6d4269"
+  };
+
+  /* ★★ 請把下面換成「你（管理員）的 Google 登入信箱」★★
+     可填多個，例如：["a@gmail.com", "b@gmail.com"]
+     只有名單內的帳號登入後，才會看到「管理員專區」與匯出功能。 */
+  const ADMIN_EMAILS = ["請改成你的管理員Email@gmail.com"];
+  /* ════════════════════════════════════════════════════════ */
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+  const provider = new GoogleAuthProvider();
+
+  const YEAR = 2026;
+  const MONTHS = [{m:6,label:"七月",en:"July"},{m:7,label:"八月",en:"August"}];
+  const WD = ["週日","週一","週二","週三","週四","週五","週六"];
+  const DOW = ["日","一","二","三","四","五","六"];
+  const ORDER = {null:"yes", yes:"no", no:null};
+  const LABEL = {yes:"參加", no:"不參加"};
+  const ICON  = {yes:"✓", no:"✕"};
+  const SESS_LABEL = {am:"晨訓", pm:"午訓"};
+  const SESS_SHORT = {am:"晨", pm:"午"};
+
+  let responses = {};
+  let allSubs = [];
+  let currentUser = null;
+  let isAdmin = false;
+
+  const $ = id => document.getElementById(id);
+  const pad = n => String(n).padStart(2,"0");
+  const dateKey = (mo,d) => `${YEAR}-${pad(mo+1)}-${pad(d)}`;
+  const daysIn = (mo) => new Date(YEAR, mo+1, 0).getDate();
+  const isRest = (mo,d) => new Date(YEAR,mo,d).getDay()===0;
+
+  /* ---------- 登入流程 ---------- */
+  onAuthStateChanged(auth, async (user)=>{
+    currentUser = user;
+    if(!user){ showLogin(); return; }
+    isAdmin = ADMIN_EMAILS.map(e=>e.toLowerCase()).includes((user.email||"").toLowerCase());
+    showApp(user);
+    await loadMine(user.uid);
+  });
+
+  function showLogin(){
+    $("loginCard").style.display="block";
+    $("appShell").style.display="none";
+    $("authBar").style.display="none";
+  }
+  function showApp(user){
+    $("loginCard").style.display="none";
+    $("appShell").style.display="block";
+    $("authBar").style.display="flex";
+    $("whoText").innerHTML = `以 <small>${esc(user.email||user.displayName||"")}</small> 登入中`;
+    $("adminBadge").style.display = isAdmin ? "inline-block" : "none";
+    $("tabAdmin").style.display = isAdmin ? "inline-block" : "none";
+  }
+
+  $("loginBtn").addEventListener("click", async ()=>{
+    const t=$("loginToast");
+    try{ await signInWithPopup(auth, provider); }
+    catch(e){
+      t.className="toast err";
+      t.textContent = "登入未完成：" + (e.code||e.message||"請再試一次") +
+        "。若在內嵌預覽視窗中，請改用實際網址或另開分頁。";
+    }
+  });
+  $("logoutBtn").addEventListener("click", ()=> signOut(auth));
+
+  async function loadMine(uid){
+    try{
+      const snap = await getDoc(doc(db,"submissions",uid));
+      if(snap.exists()){
+        const d=snap.data();
+        responses = d.responses || {};
+        $("nameInput").value = d.name || currentUser.displayName || "";
+        $("commentInput").value = d.comment || "";
+      } else {
+        responses = {};
+        $("nameInput").value = currentUser.displayName || "";
+        $("commentInput").value = "";
+      }
+    }catch(e){ responses={}; }
+    repaintAll();
+  }
+
+  /* ---------- 月曆 ---------- */
+  function buildCalendars(){
+    const root = $("calendars");
+    root.innerHTML = "";
+    MONTHS.forEach(({m,label,en})=>{
+      const sec=document.createElement("div"); sec.className="month";
+      let html=`<div class="month-h">${label} <em>${en} ${YEAR}</em>
+        <span class="mq">
+          <button class="qbtn mini-q yes-q" data-q="yes" data-month="${m+1}">本月全部參加</button>
+          <button class="qbtn mini-q no-q" data-q="no" data-month="${m+1}">本月全部不參加</button>
+        </span></div>`;
+      html+=`<div class="dow">`+DOW.map((d,i)=>`<div class="${i===0?'sun-h':''}">${d}</div>`).join("")+`</div>`;
+      html+=`<div class="grid">`;
+      const first=new Date(YEAR,m,1).getDay();
+      for(let i=0;i<first;i++) html+=`<div class="cell empty"></div>`;
+      const total=daysIn(m);
+      for(let d=1;d<=total;d++){
+        const dow=new Date(YEAR,m,d).getDay(), dk=dateKey(m,d);
+        if(dow===0){
+          html+=`<div class="cell rest"><div class="date">${d}<span class="wd">${WD[dow]}</span></div><div class="rest-tag">休息</div></div>`;
+        }else{
+          html+=`<div class="cell"><div class="date">${d}<span class="wd">${WD[dow]}</span></div>
+            <div class="sess">
+              <button class="pill" data-key="${dk}_am" data-sess="am" type="button"><span class="ic"></span>${SESS_SHORT.am}</button>
+              <button class="pill" data-key="${dk}_pm" data-sess="pm" type="button"><span class="ic"></span>${SESS_SHORT.pm}</button>
+            </div></div>`;
+        }
+      }
+      html+=`</div>`; sec.innerHTML=html; root.appendChild(sec);
+    });
+    root.querySelectorAll(".pill").forEach(p=> p.addEventListener("click", ()=>cyclePill(p)));
+    root.querySelectorAll(".mini-q").forEach(b=> b.addEventListener("click", ()=>quick(b.dataset.q, parseInt(b.dataset.month,10))));
+  }
+
+  function paintPill(p){
+    const s=responses[p.dataset.key];
+    const ic=p.querySelector(".ic");
+    const base=SESS_SHORT[p.dataset.sess];
+    if(s){ p.setAttribute("data-s",s); ic.textContent=ICON[s]; }
+    else { p.removeAttribute("data-s"); ic.textContent=""; }
+    p.childNodes.forEach(n=>{ if(n.nodeType===3) n.textContent=base; });
+  }
+  function cyclePill(p){
+    const k=p.dataset.key, next=ORDER[responses[k]||null];
+    if(next) responses[k]=next; else delete responses[k];
+    paintPill(p);
+  }
+  function repaintAll(){ document.querySelectorAll(".pill").forEach(paintPill); }
+  function quick(action, month){
+    document.querySelectorAll(".pill").forEach(p=>{
+      const k=p.dataset.key;
+      if(action==="clear"){ delete responses[k]; return; }
+      const mm=parseInt(k.split("-")[1],10);
+      if(month && mm!==month) return;
+      if(action==="yes") responses[k]="yes"; else if(action==="no") responses[k]="no";
+    });
+    repaintAll();
+  }
+
+  /* ---------- 送出（寫入 Firestore） ---------- */
+  async function submit(){
+    const name=$("nameInput").value.trim();
+    const comment=$("commentInput").value.trim();
+    const toast=$("toast");
+    if(!currentUser){ toast.className="toast err"; toast.textContent="請先登入。"; return; }
+    if(!name){ toast.className="toast err"; toast.textContent="請先輸入學員姓名。"; $("nameInput").focus(); return; }
+    if(Object.keys(responses).length===0){ toast.className="toast err"; toast.textContent="請至少勾選一個場次的意願再送出。"; return; }
+    try{
+      await setDoc(doc(db,"submissions",currentUser.uid), {
+        name, email: currentUser.email||"", responses:{...responses}, comment, updatedAt: serverTimestamp()
+      });
+      toast.className="toast ok";
+      toast.textContent=`已儲存「${name}」的填寫，共 ${Object.keys(responses).length} 個場次。`;
+      if(isAdmin){ await loadAll(); renderSummary(); }
+    }catch(e){
+      toast.className="toast err";
+      toast.textContent="儲存失敗："+(e.code||e.message||"請稍後再試")+"（請確認 Firestore 已建立並設定好規則）。";
+    }
+  }
+
+  /* ---------- 管理員：載入全部 ---------- */
+  async function loadAll(){
+    allSubs=[];
+    try{
+      const qs=await getDocs(collection(db,"submissions"));
+      allSubs=qs.docs.map(d=>d.data());
+    }catch(e){ allSubs=[]; }
+    allSubs.sort((a,b)=>{
+      const ta=a.updatedAt&&a.updatedAt.seconds?a.updatedAt.seconds:0;
+      const tb=b.updatedAt&&b.updatedAt.seconds?b.updatedAt.seconds:0;
+      return tb-ta;
+    });
+  }
+
+  function renderSummary(){ renderStats(); renderRoster(); renderDaily(); }
+  function countByStatus(){
+    let yes=0,no=0;
+    allSubs.forEach(s=>Object.values(s.responses||{}).forEach(v=>{ if(v==="yes")yes++; else if(v==="no")no++; }));
+    return {yes,no};
+  }
+  function renderStats(){
+    const c=countByStatus();
+    $("statRow").innerHTML=`
+      <div class="stat"><div class="num">${allSubs.length}</div><div class="lbl">已填寫人數</div></div>
+      <div class="stat"><div class="num">${c.yes}</div><div class="lbl">「參加」場次總數</div></div>
+      <div class="stat"><div class="num">${c.no}</div><div class="lbl">「不參加」場次總數</div></div>`;
+  }
+  function renderRoster(){
+    const el=$("roster");
+    if(allSubs.length===0){ el.innerHTML=`<div class="empty-state"><div class="big">🏊</div>目前還沒有人填寫。</div>`; return; }
+    el.innerHTML=allSubs.map(s=>{
+      const vals=Object.values(s.responses||{});
+      const y=vals.filter(v=>v==="yes").length, n=vals.filter(v=>v==="no").length;
+      let tStr="";
+      if(s.updatedAt&&s.updatedAt.seconds){ const t=new Date(s.updatedAt.seconds*1000);
+        tStr=`${t.getFullYear()}/${t.getMonth()+1}/${t.getDate()} ${pad(t.getHours())}:${pad(t.getMinutes())}`; }
+      const cmt=s.comment?`<div class="cmt">💬 ${esc(s.comment)}</div>`:"";
+      return `<div class="person">
+        <div class="avatar">${esc((s.name||"?")[0]).toUpperCase()}</div>
+        <div class="info"><div class="nm">${esc(s.name||"（未填名）")}</div>
+          <div class="tm">${esc(s.email||"")}${tStr?" · 填寫於 "+tStr:""}</div></div>
+        <div class="tally"><span class="tag y">參加 ${y}</span><span class="tag n">不參加 ${n}</span></div>
+        ${cmt}</div>`;
+    }).join("");
+  }
+  function renderDaily(){
+    const el=$("daily");
+    if(allSubs.length===0){ el.innerHTML=`<div class="empty-state">尚無資料</div>`; return; }
+    const tally={};
+    allSubs.forEach(s=>Object.entries(s.responses||{}).forEach(([k,v])=>{ if(v==="yes") tally[k]=(tally[k]||0)+1; }));
+    let html=`<table><thead><tr><th class="d">日期</th><th>星期</th><th>晨訓 🌅</th><th>午訓 🌇</th></tr></thead><tbody>`;
+    MONTHS.forEach(({m,label})=>{
+      html+=`<tr class="wk-divider"><td colspan="4">${label}</td></tr>`;
+      const total=daysIn(m);
+      for(let d=1;d<=total;d++){
+        if(isRest(m,d)) continue;
+        const dk=dateKey(m,d), dow=new Date(YEAR,m,d).getDay();
+        const am=tally[dk+"_am"]||0, pm=tally[dk+"_pm"]||0;
+        html+=`<tr><td class="d">${m+1}/${d}</td><td>${WD[dow]}</td>
+          <td><span class="mini ${am?'has':'zero'}">${am}</span></td>
+          <td><span class="mini ${pm?'has':'zero'}">${pm}</span></td></tr>`;
+      }
+    });
+    html+=`</tbody></table>`; el.innerHTML=html;
+  }
+
+  /* ---------- 匯出 ---------- */
+  function download(filename, rows){
+    const csv=rows.map(r=>r.map(c=>{ const s=String(c??""); return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s; }).join(",")).join("\r\n");
+    const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a"); a.href=url; a.download=filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+  }
+  function exportDetail(){
+    if(allSubs.length===0){ alert("目前沒有任何填寫資料可匯出。"); return; }
+    const rows=[["姓名","Email","日期","星期","場次","出席意願","其他意見"]];
+    allSubs.forEach(s=>{
+      let first=true;
+      Object.entries(s.responses||{}).forEach(([k,v])=>{
+        const [date,sess]=k.split("_"); const dt=new Date(date+"T00:00:00");
+        rows.push([s.name||"", s.email||"", date, WD[dt.getDay()], SESS_LABEL[sess]||sess, LABEL[v]||v, first?(s.comment||""):""]);
+        first=false;
+      });
+    });
+    download(`游泳訓練出席意願_明細_${stamp()}.csv`, rows);
+  }
+  function exportSummary(){
+    if(allSubs.length===0){ alert("目前沒有任何填寫資料可匯出。"); return; }
+    const tY={},tN={};
+    allSubs.forEach(s=>Object.entries(s.responses||{}).forEach(([k,v])=>{ if(v==="yes")tY[k]=(tY[k]||0)+1; if(v==="no")tN[k]=(tN[k]||0)+1; }));
+    const rows=[["日期","星期","場次","參加人數","不參加人數"]];
+    MONTHS.forEach(({m})=>{
+      const total=daysIn(m);
+      for(let d=1;d<=total;d++){
+        if(isRest(m,d)) continue;
+        const dk=dateKey(m,d), dow=new Date(YEAR,m,d).getDay();
+        ["am","pm"].forEach(sess=> rows.push([dk, WD[dow], SESS_LABEL[sess], tY[dk+"_"+sess]||0, tN[dk+"_"+sess]||0]));
+      }
+    });
+    download(`游泳訓練出席意願_每日彙總_${stamp()}.csv`, rows);
+  }
+  function stamp(){ const d=new Date(); return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}`; }
+  function esc(s){ return String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])); }
+
+  /* ---------- 分頁與按鈕 ---------- */
+  document.querySelectorAll(".tab").forEach(t=>{
+    t.addEventListener("click", async ()=>{
+      document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+      document.querySelectorAll(".panel").forEach(x=>x.classList.remove("show"));
+      t.classList.add("active");
+      $("panel-"+t.dataset.tab).classList.add("show");
+      if(t.dataset.tab==="admin" && isAdmin){ await loadAll(); renderSummary(); }
+    });
+  });
+  $("clearBtn").addEventListener("click", ()=>quick("clear"));
+  $("submitBtn").addEventListener("click", submit);
+  $("exportBtn").addEventListener("click", exportDetail);
+  $("exportSumBtn").addEventListener("click", exportSummary);
+  $("refreshBtn").addEventListener("click", async ()=>{ await loadAll(); renderSummary(); });
+
+  buildCalendars();
+  repaintAll();
+</script>
+</body>
+</html>
