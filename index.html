@@ -180,6 +180,8 @@
   .iconbtn{font-family:inherit;cursor:pointer;border:1.5px solid var(--line);background:#fff;color:var(--ink-soft);border-radius:9px;padding:7px 11px;font-size:.82rem;font-weight:700;transition:.15s}
   .iconbtn.save:hover{border-color:var(--yes);color:var(--yes);background:var(--yes-soft)}
   .iconbtn.toggle:hover{border-color:var(--sun);color:#a8730f;background:#fff3da}
+  .iconbtn.editatt:hover{border-color:var(--pool);color:var(--pool-deep);background:var(--pool-mist)}
+  .iconbtn.del:hover{border-color:var(--coral);color:#fff;background:var(--coral)}
   .add-form{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;margin-top:14px;padding-top:14px;border-top:1px dashed var(--line)}
   .add-form .fg{display:flex;flex-direction:column;gap:4px}
   .add-form .fg label{font-size:.78rem;font-weight:700;color:var(--ink-soft)}
@@ -246,6 +248,13 @@
   .subtab.active{background:var(--pool);color:#fff;border-color:var(--pool)}
   .subpanel{display:none}.subpanel.show{display:block}
   footer{text-align:center;color:var(--ink-soft);font-size:.8rem;padding:24px 0 8px}
+  /* 代改出席 modal */
+  .modal-bg{position:fixed;inset:0;background:rgba(8,42,49,.55);z-index:100;display:flex;align-items:flex-start;justify-content:center;padding:24px 12px;overflow-y:auto}
+  .modal-box{background:#fff;border-radius:20px;max-width:860px;width:100%;padding:22px;box-shadow:var(--shadow);margin:auto}
+  .modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+  .modal-head h2{font-family:"Fraunces",serif;font-weight:600;font-size:1.3rem;color:var(--pool-deep)}
+  .modal-tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+  .modal-foot{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:16px;padding-top:14px;border-top:1px dashed var(--line)}
 
   @media(max-width:560px){
     .cell{min-height:88px;padding:5px 3px 6px}
@@ -546,6 +555,27 @@
         </div>
       </div>
     </section>
+  </div>
+
+  <!-- 代改出席：彈出編輯面板 -->
+  <div id="attModal" class="modal-bg" style="display:none">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h2 id="attModalTitle">代改出席</h2>
+        <button class="iconbtn" id="attClose">✕ 關閉</button>
+      </div>
+      <div class="modal-tabs">
+        <button class="subtab active" id="attTabSummer" data-att="summer">☀️ 暑期</button>
+        <button class="subtab" id="attTabSemester" data-att="semester">📚 學期</button>
+      </div>
+      <div id="attBody"></div>
+      <div class="modal-foot">
+        <button class="btn btn-ghost btn-sm" id="attClearAll">全部清空</button>
+        <button class="btn btn-primary" id="attSave">儲存變更</button>
+        <span class="hint" id="attHint"></span>
+      </div>
+      <div class="toast" id="attToast"></div>
+    </div>
   </div>
 
   <footer>龍門泳隊訓練出席系統 · 採 Google 帳號登入；家長由管理員綁定後填寫，名單與匯出僅管理員可見。</footer>
@@ -1006,10 +1036,14 @@
         <span class="acts">
           <button class="iconbtn save" data-save="${s.id}">儲存</button>
           <button class="iconbtn toggle" data-toggle="${s.id}">${s.active===false?'啟用':'停用'}</button>
+          <button class="iconbtn editatt" data-editatt="${s.id}">代改出席</button>
+          <button class="iconbtn del" data-del="${s.id}">刪除</button>
         </span>
       </div>`).join("");
     $("rosterAdmin").querySelectorAll("[data-save]").forEach(b=> b.addEventListener("click",()=>saveBind(b.dataset.save)));
     $("rosterAdmin").querySelectorAll("[data-toggle]").forEach(b=> b.addEventListener("click",()=>toggleActive(b.dataset.toggle)));
+    $("rosterAdmin").querySelectorAll("[data-editatt]").forEach(b=> b.addEventListener("click",()=>openAttEditor(b.dataset.editatt)));
+    $("rosterAdmin").querySelectorAll("[data-del]").forEach(b=> b.addEventListener("click",()=>deleteStudent(b.dataset.del)));
   }
 
   async function saveBind(id){
@@ -1040,6 +1074,103 @@
     const next=!(s.active===false)? false : true; // 反轉
     try{ await updateDoc(doc(db,"students",id), { active:next }); s.active=next; renderBindUI(); renderSummary(); }
     catch(e){ const t=$("bindToast"); t.className="toast err"; t.textContent="更新失敗："+(e.code||e.message); }
+  }
+  async function deleteStudent(id){
+    const s=allStudents.find(x=>x.id===id); if(!s)return;
+    const t=$("bindToast");
+    if(!confirm(`確定要永久刪除「${s.name}」嗎？\n\n這會連同他的暑期與學期出席資料一起清除，且無法復原。\n\n（若只是暫時不訓練，建議用「停用」就好。）`)) return;
+    if(!confirm(`再次確認：真的要刪除「${s.name}」？此動作不可復原。`)) return;
+    try{
+      await deleteDoc(doc(db,"students",id));
+      allStudents=allStudents.filter(x=>x.id!==id);
+      t.className="toast ok"; t.textContent=`已永久刪除「${s.name}」。`;
+      renderBindUI(); renderSummary();
+    }catch(e){ t.className="toast err"; t.textContent="刪除失敗："+(e.code||e.message); }
+  }
+
+  /* ---------- 代改出席（管理員） ---------- */
+  let attEditId=null, attMode="summer", attSummer={}, attSem={};
+  function openAttEditor(id){
+    const s=allStudents.find(x=>x.id===id); if(!s)return;
+    attEditId=id; attMode="summer";
+    attSummer=s.responses?{...s.responses}:{};
+    attSem=s.semResponses?{...s.semResponses}:{};
+    $("attModalTitle").textContent="代改出席 · "+s.name;
+    $("attTabSummer").classList.add("active"); $("attTabSemester").classList.remove("active");
+    $("attToast").className="toast"; $("attToast").textContent="";
+    $("attModal").style.display="flex";
+    renderAttBody();
+  }
+  function closeAttEditor(){ $("attModal").style.display="none"; attEditId=null; }
+  function renderAttBody(){
+    const body=$("attBody");
+    if(attMode==="summer"){
+      body.innerHTML=`<p class="lead" style="margin-bottom:10px">點一下「晨/午」格子切換出席（綠勾＝會出席）。每週日休息、8/31 開學不訓練。</p><div id="attCalendars"></div>`;
+      const root=$("attCalendars");
+      MONTHS.forEach(({m,label,en})=>{
+        const sec=document.createElement("div"); sec.className="month";
+        let html=`<div class="month-h">${label} <em>${en} ${YEAR}</em></div>`;
+        html+=`<div class="dow">`+DOW.map((d,i)=>`<div class="${i===0?'sun-h':''}">${d}</div>`).join("")+`</div><div class="grid">`;
+        const first=new Date(YEAR,m,1).getDay();
+        for(let i=0;i<first;i++) html+=`<div class="cell empty"></div>`;
+        const total=daysIn(m);
+        for(let d=1;d<=total;d++){
+          const dow=new Date(YEAR,m,d).getDay(), dk=dateKey(m,d);
+          if(isSchoolStart(m,d)){ html+=`<div class="cell school"><div class="date">${d}</div><div class="school-tag">開學</div></div>`; }
+          else if(dow===0){ html+=`<div class="cell rest"><div class="date">${d}</div><div class="rest-tag">休息</div></div>`; }
+          else{
+            let pills="";
+            ["am","pm"].forEach(sess=>{ const key=dk+"_"+sess, v=venueOfKey(key);
+              pills+=`<button class="pill" data-attkey="${key}" type="button"><span class="top"><span class="ic"></span>${SESS_SHORT[sess]}</span><span class="venue ${venueClass(v)}">${v}</span></button>`; });
+            html+=`<div class="cell"><div class="date">${d}</div><div class="sess">${pills}</div></div>`;
+          }
+        }
+        html+=`</div>`; sec.innerHTML=html; root.appendChild(sec);
+      });
+      root.querySelectorAll(".pill").forEach(p=>{
+        const on=attSummer[p.dataset.attkey]==="yes"; const ic=p.querySelector(".ic");
+        if(on){ p.setAttribute("data-on","1"); ic.textContent="✓"; }
+        p.addEventListener("click",()=>{ const k=p.dataset.attkey;
+          if(attSummer[k]==="yes"){ delete attSummer[k]; p.removeAttribute("data-on"); ic.textContent=""; }
+          else { attSummer[k]="yes"; p.setAttribute("data-on","1"); ic.textContent="✓"; }
+          $("attHint").textContent=`暑期目前勾選 ${Object.keys(attSummer).length} 場`; });
+      });
+      $("attHint").textContent=`暑期目前勾選 ${Object.keys(attSummer).length} 場`;
+    } else {
+      if(!semSetup){ body.innerHTML=`<div class="note">尚未設定學期，無法編輯學期出席。</div>`; $("attHint").textContent=""; return; }
+      body.innerHTML=`<p class="lead" style="margin-bottom:10px">點一下切換「每週固定出席」。</p><div class="weekgrid" id="attWeek"></div>`;
+      const el=$("attWeek"); let html="";
+      for(let dow=1;dow<=6;dow++){
+        const am=semVenueOf(dow,"am"), pm=semVenueOf(dow,"pm");
+        if(am===null&&pm===null){ html+=`<div class="wcol rest"><div class="wd-h">${SEM_WD[dow]}</div><div class="rest-mini">休息</div></div>`; continue; }
+        let pills="";
+        [["am","晨"],["pm","午"]].forEach(([sess,short])=>{ const v=semVenueOf(dow,sess);
+          if(v===null){ pills+=`<div class="rest-mini">—</div>`; }
+          else{ pills+=`<button class="wpill" data-attskey="${dow}_${sess}" type="button"><span class="wtop"><span class="ic"></span>${short}</span><span class="wven ${venueClass(v)}">${esc(v)}</span></button>`; } });
+        html+=`<div class="wcol"><div class="wd-h">${SEM_WD[dow]}</div>${pills}</div>`;
+      }
+      el.innerHTML=html;
+      el.querySelectorAll(".wpill").forEach(p=>{
+        const on=attSem[p.dataset.attskey]==="yes"; const ic=p.querySelector(".ic");
+        if(on){ p.setAttribute("data-on","1"); ic.textContent="✓"; }
+        p.addEventListener("click",()=>{ const k=p.dataset.attskey;
+          if(attSem[k]==="yes"){ delete attSem[k]; p.removeAttribute("data-on"); ic.textContent=""; }
+          else { attSem[k]="yes"; p.setAttribute("data-on","1"); ic.textContent="✓"; }
+          $("attHint").textContent=`學期目前勾選 ${Object.keys(attSem).length} 場`; });
+      });
+      $("attHint").textContent=`學期目前勾選 ${Object.keys(attSem).length} 場`;
+    }
+  }
+  async function saveAttEditor(){
+    if(!attEditId)return; const t=$("attToast");
+    const s=allStudents.find(x=>x.id===attEditId); if(!s)return;
+    try{
+      await updateDoc(doc(db,"students",attEditId), { responses:{...attSummer}, semResponses:{...attSem}, updatedAt:serverTimestamp() });
+      s.responses={...attSummer}; s.semResponses={...attSem};
+      t.className="toast ok"; t.textContent="已儲存變更。";
+      renderSummary(); if(typeof renderSemSummary==="function") renderSemSummary();
+      setTimeout(closeAttEditor, 700);
+    }catch(e){ t.className="toast err"; t.textContent="儲存失敗："+(e.code||e.message); }
   }
   async function addStudent(){
     const name=$("newName").value.trim(), seat=$("newSeat").value.trim(), cls=$("newCls").value.trim(), grade=$("newGrade").value.trim();
@@ -1452,6 +1583,13 @@
   $("semExportWeekBtn").addEventListener("click",semExportWeekly);
   $("summerLockBtn").addEventListener("click",()=>setLock("summerOpen", !locks.summerOpen));
   $("semLockBtn").addEventListener("click",()=>setLock("semesterOpen", !locks.semesterOpen));
+  // 代改出席 modal
+  $("attClose").addEventListener("click",closeAttEditor);
+  $("attModal").addEventListener("click",(e)=>{ if(e.target===$("attModal")) closeAttEditor(); });
+  $("attTabSummer").addEventListener("click",()=>{ attMode="summer"; $("attTabSummer").classList.add("active"); $("attTabSemester").classList.remove("active"); renderAttBody(); });
+  $("attTabSemester").addEventListener("click",()=>{ attMode="semester"; $("attTabSemester").classList.add("active"); $("attTabSummer").classList.remove("active"); renderAttBody(); });
+  $("attClearAll").addEventListener("click",()=>{ if(attMode==="summer")attSummer={}; else attSem={}; renderAttBody(); });
+  $("attSave").addEventListener("click",saveAttEditor);
 
   buildCalendars();
 </script>
