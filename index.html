@@ -225,6 +225,8 @@
   .export-card .ec-t{font-weight:900;color:var(--pool-deep);font-size:1rem}
   .export-card .ec-d{font-size:.8rem;color:var(--ink-soft);line-height:1.5}
   .query-tabs,.q-result{margin-top:4px}
+  .qblock{padding:16px;border:1.5px solid #e3f1f2;border-radius:14px;margin-bottom:14px;background:#fbfdfe}
+  .qblock-h{font-weight:900;color:var(--pool-deep);font-size:.98rem;margin-bottom:12px}
   .query-tabs{display:flex;gap:8px;margin-bottom:14px}
   .q-select{width:100%;font-family:inherit;font-size:1rem;padding:11px 14px;border:1.5px solid var(--line);border-radius:11px;background:var(--pool-mist)}
   .q-select:focus{outline:none;border-color:var(--pool-bright);background:#fff}
@@ -404,9 +406,8 @@
         </div>
 
         <div class="card" id="initCard" style="display:none">
-          <h2>📥 匯入隊員名單</h2>
-          <p class="lead">系統內建龍門泳隊 33 位隊員名單（依原始順序）。第一次使用請按下方按鈕匯入；匯入後即可逐位綁定家長。</p>
-          <button type="button" class="btn btn-primary" id="initBtn">匯入龍門隊員名單（33 人）</button>
+          <h2>📥 名單是空的</h2>
+          <p class="lead">目前系統裡沒有任何學員。為保護學生個資，名單已改存於雲端資料庫、不再寫在程式裡。你可以用下方「新增學員」逐位建立，或使用一次性的匯入工具批次匯入。</p>
           <div class="toast" id="initToast"></div>
         </div>
 
@@ -476,16 +477,14 @@
 
         <div class="card">
           <h2>🔍 快速查詢</h2>
-          <div class="query-tabs">
-            <button type="button" class="subtab active" id="qTabPerson" data-q="person">查某人</button>
-            <button type="button" class="subtab" id="qTabDay" data-q="day">查某天某場</button>
-          </div>
-          <div id="qPerson">
-            <div class="field" style="max-width:320px"><label>選擇學員</label>
+          <div class="qblock">
+            <div class="qblock-h">👤 查某人 — 看他整個暑假哪幾場會出席</div>
+            <div class="field" style="max-width:340px"><label>選擇學員</label>
               <select id="qPersonSel" class="q-select"></select></div>
             <div id="qPersonResult" class="q-result"></div>
           </div>
-          <div id="qDay" style="display:none">
+          <div class="qblock">
+            <div class="qblock-h">📆 查某天某場 — 看那一場有哪些人出席</div>
             <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
               <div class="field" style="flex:1;min-width:150px"><label>日期</label><input id="qDayDate" type="date" min="2026-07-01" max="2026-08-30"></div>
               <div class="field" style="min-width:120px"><label>場次</label>
@@ -654,48 +653,13 @@
   /* ★ 最高管理員 Email（唯一可修改名單/綁定/權限的人，可多個）。這是安全根基，請勿隨意增加。 */
   const ADMIN_EMAILS = ["huichungw@gmail.com"];
   /* 檢視者（師長/正副會長等，只能看與匯出）改為在「人員權限」介面動態管理，存於資料庫。
-     下面這份只是「第一次初始化」用的預設種子，匯入後即以資料庫為準。 */
-  const SEED_VIEWERS = [
-    { email:"vanessa2373.annie@gmail.com", title:"副會長" }
-  ];
+     此處留空即可；檢視者名單以 Firebase 為準。 */
+  const SEED_VIEWERS = [];
   /* ═══════════════════════════════ */
 
-  /* ★ 內建龍門隊員名單（依原始順序；之後增減用管理員介面，不動此處） */
-  const DEFAULT_ROSTER = [
-    {order:1, cls:904, seat:8, name:"金采儀", grade:"九年級"},
-    {order:2, cls:905, seat:23, name:"唐家寶", grade:"九年級"},
-    {order:3, cls:906, seat:25, name:"呂誠", grade:"九年級"},
-    {order:4, cls:908, seat:33, name:"楊宥樂", grade:"九年級"},
-    {order:5, cls:913, seat:26, name:"洪禮揚", grade:"九年級"},
-    {order:6, cls:802, seat:11, name:"楊霈妮", grade:"八年級"},
-    {order:7, cls:803, seat:23, name:"呂紹宇", grade:"八年級"},
-    {order:8, cls:804, seat:16, name:"蔡萭潼", grade:"八年級"},
-    {order:9, cls:810, seat:35, name:"鄭宇廷", grade:"八年級"},
-    {order:10, cls:812, seat:31, name:"楊立傳", grade:"八年級"},
-    {order:11, cls:812, seat:32, name:"楊立楷", grade:"八年級"},
-    {order:12, cls:813, seat:2, name:"王曉霏", grade:"八年級"},
-    {order:13, cls:813, seat:21, name:"李晨睿", grade:"八年級"},
-    {order:14, cls:815, seat:26, name:"林泳廷", grade:"八年級"},
-    {order:15, cls:816, seat:1, name:"蔡進樺", grade:"八年級"},
-    {order:16, cls:701, seat:24, name:"林子堯", grade:"七年級"},
-    {order:17, cls:702, seat:7, name:"和怡霈", grade:"七年級"},
-    {order:18, cls:703, seat:12, name:"曾澄", grade:"七年級"},
-    {order:19, cls:703, seat:22, name:"吳定宇", grade:"七年級"},
-    {order:20, cls:703, seat:33, name:"楊杰栩", grade:"七年級"},
-    {order:21, cls:703, seat:37, name:"蘇柏宇", grade:"七年級"},
-    {order:22, cls:706, seat:28, name:"陳羿愷", grade:"七年級"},
-    {order:23, cls:709, seat:4, name:"朱秭儀", grade:"七年級"},
-    {order:24, cls:710, seat:3, name:"周懿", grade:"七年級"},
-    {order:25, cls:710, seat:5, name:"柯柔瑄", grade:"七年級"},
-    {order:26, cls:710, seat:22, name:"何浩霆", grade:"七年級"},
-    {order:27, cls:710, seat:35, name:"鄭咏承", grade:"七年級"},
-    {order:28, cls:711, seat:10, name:"陳柏方", grade:"七年級"},
-    {order:29, cls:713, seat:12, name:"楊詠昕", grade:"七年級"},
-    {order:30, cls:714, seat:36, name:"謝東君", grade:"七年級"},
-    {order:31, cls:715, seat:2, name:"何昕語", grade:"七年級"},
-    {order:32, cls:715, seat:14, name:"鄭郁馨", grade:"七年級"},
-    {order:33, cls:716, seat:23, name:"呂訢", grade:"七年級"}
-  ];
+  /* 名單已改存於 Firebase（保護學生個資，程式碼不再內含任何姓名）。
+     如需重建初始名單，請另用一次性的匯入工具，不要把名單寫回這裡。 */
+  const DEFAULT_ROSTER = [];
 
   const app=initializeApp(firebaseConfig), auth=getAuth(app), db=getFirestore(app);
   const provider=new GoogleAuthProvider();
@@ -1056,14 +1020,8 @@
 
   async function initRoster(){
     const t=$("initToast");
-    try{
-      for(const s of DEFAULT_ROSTER){
-        const id="s"+pad(s.order);
-        await setDoc(doc(db,"students",id), { order:s.order, cls:s.cls, seat:s.seat, name:s.name, grade:s.grade, parentEmail:"", parentEmail2:"", parentNote:"", unlockSummer:false, unlockSemester:false, active:true, responses:{}, comment:"" });
-      }
-      t.className="toast ok"; t.textContent="已匯入 33 位隊員名單，可開始綁定家長信箱。";
-      await loadAllStudents(); renderBindUI(); renderSummary();
-    }catch(e){ t.className="toast err"; t.textContent="匯入失敗："+(e.code||e.message)+"（請確認你是管理員且規則已設定）。"; }
+    t.className="toast err";
+    t.textContent="名單已改存於 Firebase，程式碼不再內含名單，因此沒有可一鍵匯入的內建名單。若名單是空的需要重建，請使用一次性的匯入工具，或在下方「新增學員」逐位建立。";
   }
 
   function renderBindUI(){
@@ -1083,7 +1041,7 @@
         </span>
         <span class="bind"><input type="email" placeholder="家長信箱 1（如爸爸）" value="${esc(s.parentEmail||"")}" data-bind="${s.id}"></span>
         <span class="bind"><input type="email" placeholder="家長信箱 2（如媽媽，可留空）" value="${esc(s.parentEmail2||"")}" data-bind2="${s.id}"></span>
-        <span class="bind"><input type="text" placeholder="備註（如：金采儀家，僅你看得到）" value="${esc(s.parentNote||"")}" data-note="${s.id}"></span>
+        <span class="bind"><input type="text" placeholder="備註（如：小明媽，僅你看得到）" value="${esc(s.parentNote||"")}" data-note="${s.id}"></span>
         <span class="unlock-cell">
           <label title="即使暑期已截止，仍允許此家長修改"><input type="checkbox" data-unlock-su="${s.id}" ${s.unlockSummer===true?"checked":""}>暑期特例</label>
           <label title="即使學期已截止，仍允許此家長修改"><input type="checkbox" data-unlock-se="${s.id}" ${s.unlockSemester===true?"checked":""}>學期特例</label>
@@ -1745,7 +1703,6 @@
   $("clearBtn").addEventListener("click",()=>quick("clear"));
   $("submitBtn").addEventListener("click",submit);
   $("printBtn").addEventListener("click",printMyStudent);
-  $("initBtn").addEventListener("click",initRoster);
   $("addStuBtn").addEventListener("click",addStudent);
   $("reloadRosterBtn").addEventListener("click",async()=>{ await loadAllStudents(); renderBindUI(); renderSummary(); });
   $("addViewerBtn").addEventListener("click",addViewer);
@@ -1754,8 +1711,6 @@
   $("exportGridBtn").addEventListener("click",exportGrid);
   $("exportMonthBtn").addEventListener("click",exportMonthly);
   // 快速查詢
-  $("qTabPerson").addEventListener("click",()=>{ $("qTabPerson").classList.add("active"); $("qTabDay").classList.remove("active"); $("qPerson").style.display="block"; $("qDay").style.display="none"; });
-  $("qTabDay").addEventListener("click",()=>{ $("qTabDay").classList.add("active"); $("qTabPerson").classList.remove("active"); $("qDay").style.display="block"; $("qPerson").style.display="none"; });
   $("qPersonSel").addEventListener("change",e=>showPersonResult(e.target.value));
   $("qDayDate").addEventListener("change",showDayResult);
   $("qDaySess").addEventListener("change",showDayResult);
