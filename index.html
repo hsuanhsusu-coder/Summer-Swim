@@ -301,14 +301,14 @@
   <div class="authbar" id="authBar">
     <span class="who" id="whoText"></span>
     <span class="badge-admin" id="adminBadge" style="display:none">管理員</span>
-    <button class="linkbtn" id="logoutBtn">登出</button>
+    <button type="button" class="linkbtn" id="logoutBtn">登出</button>
   </div>
 
   <section class="login-card" id="loginCard">
     <div class="ic">🏊</div>
     <h2>請先登入</h2>
     <p>請用你的 Google 帳號登入。登入後會看到管理員指派給你的孩子，即可填寫出席意願。</p>
-    <button class="gbtn" id="loginBtn">
+    <button type="button" class="gbtn" id="loginBtn">
       <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
       使用 Google 登入
     </button>
@@ -317,13 +317,13 @@
 
   <div id="appShell">
     <div class="mode-switch" id="modeSwitch">
-      <button class="mode-btn active" data-mode="summer" id="modeSummer">☀️ 暑期訓練</button>
-      <button class="mode-btn" data-mode="semester" id="modeSemester">📚 學期訓練</button>
+      <button type="button" class="mode-btn active" data-mode="summer" id="modeSummer">☀️ 暑期訓練</button>
+      <button type="button" class="mode-btn" data-mode="semester" id="modeSemester">📚 學期訓練</button>
     </div>
 
     <div class="tabs">
-      <button class="tab active" data-tab="fill" id="tabFill">✍️ 填寫意願</button>
-      <button class="tab" data-tab="admin" id="tabAdmin">🔒 管理員專區</button>
+      <button type="button" class="tab active" data-tab="fill" id="tabFill">✍️ 填寫意願</button>
+      <button type="button" class="tab" data-tab="admin" id="tabAdmin">🔒 管理員專區</button>
     </div>
 
     <!-- ===== 填寫（家長） ===== -->
@@ -361,7 +361,7 @@
           </div>
           <div class="quick">
             <span class="qlab">快速填入：</span>
-            <button class="qbtn clear" id="clearBtn">全部清空</button>
+            <button type="button" class="qbtn clear" id="clearBtn">全部清空</button>
             <span class="qnote">每個月可用標題旁的「本月全部出席」一鍵填入。</span>
           </div>
           <div id="calendars"></div>
@@ -377,8 +377,8 @@
 
         <div class="card">
           <div class="submit-row">
-            <button class="btn btn-primary" id="submitBtn">儲存這位學員</button>
-            <button class="btn btn-ghost" id="printBtn">🖨️ 列印 / 存成 PDF</button>
+            <button type="button" class="btn btn-primary" id="submitBtn">儲存這位學員</button>
+            <button type="button" class="btn btn-ghost" id="printBtn">🖨️ 列印 / 存成 PDF</button>
             <span class="hint">每位學員分開儲存；列印前請先儲存。</span>
           </div>
           <div class="toast" id="toast"></div>
@@ -389,9 +389,9 @@
     <!-- ===== 管理員 ===== -->
     <section class="panel" id="panel-admin">
       <div class="subtabs">
-        <button class="subtab active" data-sub="bind" id="subtabBind">👨‍👩‍👧 名單與家長綁定</button>
-        <button class="subtab" data-sub="perm" id="subtabPerm">🛡️ 人員權限</button>
-        <button class="subtab" data-sub="summary" id="subtabSummary">📊 出席彙總與匯出</button>
+        <button type="button" class="subtab active" data-sub="bind" id="subtabBind">👨‍👩‍👧 名單與家長綁定</button>
+        <button type="button" class="subtab" data-sub="perm" id="subtabPerm">🛡️ 人員權限</button>
+        <button type="button" class="subtab" data-sub="summary" id="subtabSummary">📊 出席彙總與匯出</button>
       </div>
 
       <!-- 名單與綁定 -->
@@ -399,20 +399,20 @@
         <div class="card">
           <h2>🔓 暑期填寫開關</h2>
           <p class="lead">控制家長能不能填寫／修改「暑期」出席。切到「已截止」後，家長就改不了（這是規則層級的真鎖定）；要放行個別家長，可在下方名單該位的「暑期特例」打勾。</p>
-          <button class="btn btn-ghost" id="summerLockBtn">🟢 暑期填寫：開放中</button>
+          <button type="button" class="btn btn-ghost" id="summerLockBtn">🟢 暑期填寫：開放中</button>
           <div class="hint" id="summerLockState" style="margin-top:8px"></div>
         </div>
 
         <div class="card" id="initCard" style="display:none">
           <h2>📥 匯入隊員名單</h2>
           <p class="lead">系統內建龍門泳隊 33 位隊員名單（依原始順序）。第一次使用請按下方按鈕匯入；匯入後即可逐位綁定家長。</p>
-          <button class="btn btn-primary" id="initBtn">匯入龍門隊員名單（33 人）</button>
+          <button type="button" class="btn btn-primary" id="initBtn">匯入龍門隊員名單（33 人）</button>
           <div class="toast" id="initToast"></div>
         </div>
 
         <div class="card" id="bindCard" style="display:none">
           <h2>👨‍👩‍👧 名單與家長綁定
-            <button class="iconbtn save btn-sm" id="reloadRosterBtn" style="margin-left:auto">🔄 重新整理</button>
+            <button type="button" class="iconbtn save btn-sm" id="reloadRosterBtn" style="margin-left:auto">🔄 重新整理</button>
           </h2>
           <p class="lead">每位學員的「姓名／年級／班級／座號」都可以直接改（例如升年級、補上新隊員的班級座號），右邊填家長的 Google 信箱，改完按「儲存」。家長用該信箱登入後就會看到孩子。一個家長可填在多位學員上；新增的人加在最後、停用的人不重排，順序固定不變。</p>
           <div class="roster-admin" id="rosterAdmin"></div>
@@ -422,7 +422,7 @@
             <div class="fg"><label>座號</label><input id="newSeat" placeholder="座號"></div>
             <div class="fg"><label>班級</label><input id="newCls" placeholder="班級"></div>
             <div class="fg"><label>年級</label><input id="newGrade" placeholder="如 七年級"></div>
-            <button class="btn btn-ghost btn-sm" id="addStuBtn">＋ 新增學員</button>
+            <button type="button" class="btn btn-ghost btn-sm" id="addStuBtn">＋ 新增學員</button>
           </div>
           <div class="toast" id="bindToast"></div>
         </div>
@@ -433,12 +433,12 @@
         <div class="card">
           <h2>🛡️ 人員權限（檢視者）</h2>
           <p class="lead">這裡管理「只能看與匯出」的人員——師長、正/副會長、沒有小孩但需要看資料的人都可加在這裡。他們用自己的 Google 信箱登入後，會看到「出席彙總與匯出」，但不能修改名單或綁定。頭銜只是給你自己辨識用。<b>只有最高管理員能修改這份名單。</b></p>
-          <button class="btn btn-ghost btn-sm" id="seedViewerBtn" style="display:none;margin-bottom:12px">匯入預設檢視者</button>
+          <button type="button" class="btn btn-ghost btn-sm" id="seedViewerBtn" style="display:none;margin-bottom:12px">匯入預設檢視者</button>
           <div class="roster-admin" id="viewerList"></div>
           <div class="add-form">
             <div class="fg"><label>Google 信箱</label><input id="newViewerEmail" class="wide" placeholder="someone@gmail.com"></div>
             <div class="fg"><label>頭銜（辨識用）</label><input id="newViewerTitle" class="wide" placeholder="如：師長 / 正會長 / 副會長"></div>
-            <button class="btn btn-primary btn-sm" id="addViewerBtn">＋ 新增檢視者</button>
+            <button type="button" class="btn btn-primary btn-sm" id="addViewerBtn">＋ 新增檢視者</button>
           </div>
           <div class="toast" id="permToast"></div>
         </div>
@@ -456,17 +456,17 @@
           <h2>⬇️ 匯出</h2>
           <p class="lead">三種格式，依用途選用：</p>
           <div class="export-grid">
-            <button class="export-card" id="exportCalBtn">
+            <button type="button" class="export-card" id="exportCalBtn">
               <span class="ec-ic">📅</span>
               <span class="ec-t">月曆版（列印 / PDF）</span>
               <span class="ec-d">七、八月真月曆，每格顯示晨／午出席人數，適合貼公布欄。</span>
             </button>
-            <button class="export-card" id="exportGridBtn">
+            <button type="button" class="export-card" id="exportGridBtn">
               <span class="ec-ic">📋</span>
               <span class="ec-t">匯總版 Excel</span>
               <span class="ec-d">一人一列、橫向每天每場次打勾，含篩選與凍結，方便查名字。</span>
             </button>
-            <button class="export-card" id="exportMonthBtn">
+            <button type="button" class="export-card" id="exportMonthBtn">
               <span class="ec-ic">📈</span>
               <span class="ec-t">個人月統計 Excel</span>
               <span class="ec-d">每位七月、八月各幾場、龍門／永運分佈，一人一列。</span>
@@ -477,8 +477,8 @@
         <div class="card">
           <h2>🔍 快速查詢</h2>
           <div class="query-tabs">
-            <button class="subtab active" id="qTabPerson" data-q="person">查某人</button>
-            <button class="subtab" id="qTabDay" data-q="day">查某天某場</button>
+            <button type="button" class="subtab active" id="qTabPerson" data-q="person">查某人</button>
+            <button type="button" class="subtab" id="qTabDay" data-q="day">查某天某場</button>
           </div>
           <div id="qPerson">
             <div class="field" style="max-width:320px"><label>選擇學員</label>
@@ -536,8 +536,8 @@
           </div>
           <div class="quick">
             <span class="qlab">快速：</span>
-            <button class="qbtn yes-q" id="semAllYes">全部固定出席</button>
-            <button class="qbtn clear" id="semClear">全部清空</button>
+            <button type="button" class="qbtn yes-q" id="semAllYes">全部固定出席</button>
+            <button type="button" class="qbtn clear" id="semClear">全部清空</button>
           </div>
           <div class="weekgrid" id="semWeek"></div>
         </div>
@@ -548,8 +548,8 @@
         </div>
         <div class="card">
           <div class="submit-row">
-            <button class="btn btn-primary" id="semSubmitBtn">儲存這位學員</button>
-            <button class="btn btn-ghost" id="semPrintBtn">🖨️ 列印 / 存成 PDF</button>
+            <button type="button" class="btn btn-primary" id="semSubmitBtn">儲存這位學員</button>
+            <button type="button" class="btn btn-ghost" id="semPrintBtn">🖨️ 列印 / 存成 PDF</button>
             <span class="hint">每位學員分開儲存；列印前請先儲存。</span>
           </div>
           <div class="toast" id="semToast"></div>
@@ -560,8 +560,8 @@
     <!-- ===== 學期：管理員 ===== -->
     <section class="panel" id="panel-sem-admin">
       <div class="subtabs">
-        <button class="subtab active" data-ssub="setup" id="ssubSetup">⚙️ 學期設定</button>
-        <button class="subtab" data-ssub="summary" id="ssubSummary">📊 出席彙總與匯出</button>
+        <button type="button" class="subtab active" data-ssub="setup" id="ssubSetup">⚙️ 學期設定</button>
+        <button type="button" class="subtab" data-ssub="summary" id="ssubSummary">📊 出席彙總與匯出</button>
       </div>
 
       <!-- 學期設定 -->
@@ -576,13 +576,13 @@
           </div>
           <label style="display:block;font-weight:700;font-size:.92rem;margin-bottom:8px">每週訓練模板</label>
           <div id="tplRows"></div>
-          <div style="margin-top:16px"><button class="btn btn-primary" id="semSaveSetup">儲存學期設定</button></div>
+          <div style="margin-top:16px"><button type="button" class="btn btn-primary" id="semSaveSetup">儲存學期設定</button></div>
           <div class="toast" id="semSetupToast"></div>
         </div>
         <div class="card">
           <h2>🔓 學期填寫開關</h2>
           <p class="lead">控制家長能不能填寫／修改「學期」每週常規。切到「已截止」後家長就改不了（規則層級真鎖）；要放行個別家長，可到「暑期訓練 → 名單與家長綁定」該位的「學期特例」打勾。</p>
-          <button class="btn btn-ghost" id="semLockBtn">🟢 學期填寫：開放中</button>
+          <button type="button" class="btn btn-ghost" id="semLockBtn">🟢 學期填寫：開放中</button>
           <div class="hint" id="semLockState" style="margin-top:8px"></div>
         </div>
       </div>
@@ -594,8 +594,8 @@
           <div class="stat-row" id="semStatRow"></div>
           <div id="semUnfilledBox"></div>
           <div class="export-row">
-            <button class="btn btn-primary" id="semExportBtn">⬇️ 匯出 CSV（明細）</button>
-            <button class="btn btn-ghost" id="semExportWeekBtn">⬇️ 每週彙總 CSV</button>
+            <button type="button" class="btn btn-primary" id="semExportBtn">⬇️ 匯出 CSV（明細）</button>
+            <button type="button" class="btn btn-ghost" id="semExportWeekBtn">⬇️ 每週彙總 CSV</button>
           </div>
           <div class="note">明細為「一列一個固定出席場次」（姓名／座號／年級／家長信箱／星期／場次／地點）；每週彙總列出每個場次有幾人固定出席。</div>
         </div>
@@ -617,16 +617,16 @@
     <div class="modal-box">
       <div class="modal-head">
         <h2 id="attModalTitle">代改出席</h2>
-        <button class="iconbtn" id="attClose">✕ 關閉</button>
+        <button type="button" class="iconbtn" id="attClose">✕ 關閉</button>
       </div>
       <div class="modal-tabs">
-        <button class="subtab active" id="attTabSummer" data-att="summer">☀️ 暑期</button>
-        <button class="subtab" id="attTabSemester" data-att="semester">📚 學期</button>
+        <button type="button" class="subtab active" id="attTabSummer" data-att="summer">☀️ 暑期</button>
+        <button type="button" class="subtab" id="attTabSemester" data-att="semester">📚 學期</button>
       </div>
       <div id="attBody"></div>
       <div class="modal-foot">
-        <button class="btn btn-ghost btn-sm" id="attClearAll">全部清空</button>
-        <button class="btn btn-primary" id="attSave">儲存變更</button>
+        <button type="button" class="btn btn-ghost btn-sm" id="attClearAll">全部清空</button>
+        <button type="button" class="btn btn-primary" id="attSave">儲存變更</button>
         <span class="hint" id="attHint"></span>
       </div>
       <div class="toast" id="attToast"></div>
@@ -844,7 +844,7 @@
     const root=$("calendars"); root.innerHTML="";
     MONTHS.forEach(({m,label,en})=>{
       const sec=document.createElement("div"); sec.className="month";
-      let html=`<div class="month-h">${label} <em>${en} ${YEAR}</em><span class="mq"><button class="qbtn mini-q yes-q" data-q="yes" data-month="${m+1}">本月全部出席</button></span></div>`;
+      let html=`<div class="month-h">${label} <em>${en} ${YEAR}</em><span class="mq"><button type="button" class="qbtn mini-q yes-q" data-q="yes" data-month="${m+1}">本月全部出席</button></span></div>`;
       html+=`<div class="dow">`+DOW.map((d,i)=>`<div class="${i===0?'sun-h':''}">${d}</div>`).join("")+`</div><div class="grid">`;
       const first=new Date(YEAR,m,1).getDay();
       for(let i=0;i<first;i++) html+=`<div class="cell empty"></div>`;
@@ -955,7 +955,7 @@
         @media print{ body{padding:0} .noprint{display:none} }
         .pbtn{margin:16px 0;padding:10px 22px;font-size:14px;font-weight:700;background:#0a4f5e;color:#fff;border:none;border-radius:10px;cursor:pointer}
       </style></head><body>
-      <button class="pbtn noprint" onclick="window.print()">🖨️ 列印 / 另存為 PDF</button>
+      <button type="button" class="pbtn noprint" onclick="window.print()">🖨️ 列印 / 另存為 PDF</button>
       <h1>2026 龍門泳隊暑期訓練 · 出席表</h1>
       <div class="info">學員：${esc(s.name)}${studentMeta(s)?" ｜ "+studentMeta(s):""}</div>
       <div class="sum">出席合計 <b>${t.total}</b> 場（七月 ${t.jul}、八月 ${t.aug}）｜ 龍門 ${t.long} 場、永運 ${t.yong} 場</div>
@@ -1049,7 +1049,7 @@
     el.innerHTML=viewers.map(v=>`
       <div class="radmin-row" data-vid="${esc(v.email)}">
         <span class="nm">${esc(v.title||"（未填頭銜）")}<small>${esc(v.email)}</small></span>
-        <span class="acts"><button class="iconbtn toggle" data-rmview="${esc(v.email)}">移除</button></span>
+        <span class="acts"><button type="button" class="iconbtn toggle" data-rmview="${esc(v.email)}">移除</button></span>
       </div>`).join("");
     el.querySelectorAll("[data-rmview]").forEach(b=> b.addEventListener("click",()=>removeViewer(b.dataset.rmview)));
   }
@@ -1089,10 +1089,10 @@
           <label title="即使學期已截止，仍允許此家長修改"><input type="checkbox" data-unlock-se="${s.id}" ${s.unlockSemester===true?"checked":""}>學期特例</label>
         </span>
         <span class="acts">
-          <button class="iconbtn save" data-save="${s.id}">儲存</button>
-          <button class="iconbtn toggle" data-toggle="${s.id}">${s.active===false?'啟用':'停用'}</button>
-          <button class="iconbtn editatt" data-editatt="${s.id}">代改出席</button>
-          <button class="iconbtn del" data-del="${s.id}">刪除</button>
+          <button type="button" class="iconbtn save" data-save="${s.id}">儲存</button>
+          <button type="button" class="iconbtn toggle" data-toggle="${s.id}">${s.active===false?'啟用':'停用'}</button>
+          <button type="button" class="iconbtn editatt" data-editatt="${s.id}">代改出席</button>
+          <button type="button" class="iconbtn del" data-del="${s.id}">刪除</button>
         </span>
       </div>`).join("");
     $("rosterAdmin").querySelectorAll("[data-save]").forEach(b=> b.addEventListener("click",()=>saveBind(b.dataset.save)));
@@ -1368,7 +1368,7 @@
       .legend{font-size:11px;color:#3c6068;margin:6px 0 0}
       .pbtn{margin:14px 0;padding:10px 22px;font-size:14px;font-weight:700;background:#0a4f5e;color:#fff;border:none;border-radius:10px;cursor:pointer}
       @media print{body{padding:0}.noprint{display:none}}</style></head><body>
-      <button class="pbtn noprint" onclick="window.print()">🖨️ 列印 / 另存為 PDF</button>
+      <button type="button" class="pbtn noprint" onclick="window.print()">🖨️ 列印 / 另存為 PDF</button>
       <h1>2026 龍門泳隊暑期訓練 · 出席月曆</h1>
       <div class="sub">每格數字為「會出席」人數；晨＝晨訓、午＝午訓；<span style="color:#2f6fb0">藍</span>＝龍門、<span style="color:#e0764f">橘</span>＝永運。</div>
       ${monthBlock(6,"七月")}${monthBlock(7,"八月")}
@@ -1634,7 +1634,7 @@
       th{background:#f4fafb;color:#0a4f5e}td.dn{font-weight:700;background:#fafdfd}td.mk{background:#e4f6f2;color:#0a6b60;font-weight:700}td.no{color:#c2cdcf}
       .pbtn{margin:16px 0;padding:10px 22px;font-size:14px;font-weight:700;background:#0a4f5e;color:#fff;border:none;border-radius:10px;cursor:pointer}
       @media print{body{padding:0}.noprint{display:none}}</style></head><body>
-      <button class="pbtn noprint" onclick="window.print()">🖨️ 列印 / 另存為 PDF</button>
+      <button type="button" class="pbtn noprint" onclick="window.print()">🖨️ 列印 / 另存為 PDF</button>
       <h1>${esc(semSetup?semSetup.name:"學期訓練")} · 每週訓練常規</h1>
       <div class="info">學員：${esc(s.name)}${studentMeta(s)?" ｜ "+studentMeta(s):""}</div>
       <div class="info">學期期間：${esc(semSetup?semSetup.start:"")} ～ ${esc(semSetup?semSetup.end:"")}</div>
