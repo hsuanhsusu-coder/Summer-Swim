@@ -218,6 +218,23 @@
   .wk-divider td{background:#f3fafb;font-weight:900;color:var(--pool-deep);text-align:left}
 
   .export-row{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:8px}
+  .export-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+  .export-card{text-align:left;font-family:inherit;cursor:pointer;background:var(--pool-mist);border:1.5px solid #e3f1f2;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:5px;transition:.15s}
+  .export-card:hover{border-color:var(--pool);background:#fff;transform:translateY(-2px);box-shadow:0 10px 22px -14px var(--pool-deep)}
+  .export-card .ec-ic{font-size:1.7rem}
+  .export-card .ec-t{font-weight:900;color:var(--pool-deep);font-size:1rem}
+  .export-card .ec-d{font-size:.8rem;color:var(--ink-soft);line-height:1.5}
+  .query-tabs,.q-result{margin-top:4px}
+  .query-tabs{display:flex;gap:8px;margin-bottom:14px}
+  .q-select{width:100%;font-family:inherit;font-size:1rem;padding:11px 14px;border:1.5px solid var(--line);border-radius:11px;background:var(--pool-mist)}
+  .q-select:focus{outline:none;border-color:var(--pool-bright);background:#fff}
+  .q-result{margin-top:16px}
+  .q-empty{color:var(--ink-soft);font-size:.9rem;padding:18px;text-align:center;background:var(--pool-mist);border-radius:12px}
+  .q-namelist{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .q-name{background:var(--yes-soft);color:#0a6b60;font-weight:700;font-size:.88rem;padding:7px 13px;border-radius:999px}
+  .q-sess-block{margin-bottom:14px}
+  .q-sess-h{font-weight:900;color:var(--pool-deep);margin-bottom:6px;display:flex;align-items:center;gap:8px}
+  .q-cnt{background:var(--pool);color:#fff;font-size:.78rem;padding:2px 10px;border-radius:999px}
   .note{font-size:.82rem;color:var(--ink-soft);background:var(--pool-mist);border-left:3px solid var(--pool);padding:11px 15px;border-radius:0 10px 10px 0;margin-top:6px}
   .mode-switch{display:flex;gap:0;margin-bottom:18px;background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:5px;box-shadow:var(--shadow);max-width:380px}
   .mode-btn{flex:1;font-family:inherit;font-size:.98rem;font-weight:700;cursor:pointer;border:none;background:transparent;color:var(--ink-soft);padding:11px 14px;border-radius:10px;transition:.18s}
@@ -433,13 +450,51 @@
           <h2>📊 整體彙總</h2>
           <div class="stat-row" id="statRow"></div>
           <div id="unfilledBox"></div>
-          <div class="export-row">
-            <button class="btn btn-primary" id="exportBtn">⬇️ 匯出 CSV（明細）</button>
-            <button class="btn btn-ghost" id="exportMonthBtn">⬇️ 個人月統計 CSV</button>
-            <button class="btn btn-ghost" id="exportSumBtn">⬇️ 每日彙總 CSV</button>
-          </div>
-          <div class="note">明細為「一列一個出席場次」（姓名／座號／年級／家長信箱／日期／星期／場次／地點）；個人月統計列出每位七月、八月各出席幾場與地點分佈。CSV 為 UTF-8 含 BOM。</div>
         </div>
+
+        <div class="card">
+          <h2>⬇️ 匯出</h2>
+          <p class="lead">三種格式，依用途選用：</p>
+          <div class="export-grid">
+            <button class="export-card" id="exportCalBtn">
+              <span class="ec-ic">📅</span>
+              <span class="ec-t">月曆版（列印 / PDF）</span>
+              <span class="ec-d">七、八月真月曆，每格顯示晨／午出席人數，適合貼公布欄。</span>
+            </button>
+            <button class="export-card" id="exportGridBtn">
+              <span class="ec-ic">📋</span>
+              <span class="ec-t">匯總版 Excel</span>
+              <span class="ec-d">一人一列、橫向每天每場次打勾，含篩選與凍結，方便查名字。</span>
+            </button>
+            <button class="export-card" id="exportMonthBtn">
+              <span class="ec-ic">📈</span>
+              <span class="ec-t">個人月統計 Excel</span>
+              <span class="ec-d">每位七月、八月各幾場、龍門／永運分佈，一人一列。</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>🔍 快速查詢</h2>
+          <div class="query-tabs">
+            <button class="subtab active" id="qTabPerson" data-q="person">查某人</button>
+            <button class="subtab" id="qTabDay" data-q="day">查某天某場</button>
+          </div>
+          <div id="qPerson">
+            <div class="field" style="max-width:320px"><label>選擇學員</label>
+              <select id="qPersonSel" class="q-select"></select></div>
+            <div id="qPersonResult" class="q-result"></div>
+          </div>
+          <div id="qDay" style="display:none">
+            <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+              <div class="field" style="flex:1;min-width:150px"><label>日期</label><input id="qDayDate" type="date" min="2026-07-01" max="2026-08-30"></div>
+              <div class="field" style="min-width:120px"><label>場次</label>
+                <select id="qDaySess" class="q-select"><option value="am">晨訓</option><option value="pm">午訓</option></select></div>
+            </div>
+            <div id="qDayResult" class="q-result"></div>
+          </div>
+        </div>
+
         <div class="card">
           <h2>👥 出席名單（依名單順序）</h2>
           <div class="roster" id="roster"></div>
@@ -1188,7 +1243,7 @@
 
   /* ---------- 管理員：彙總 ---------- */
   function activeAll(){ return allStudents.filter(s=>s.active!==false); }
-  function renderSummary(){ renderStats(); renderRoster(); renderDaily(); }
+  function renderSummary(){ renderStats(); renderRoster(); renderDaily(); if(typeof renderQueryPerson==="function") renderQueryPerson(); }
   function renderStats(){
     const list=activeAll();
     const filledList=list.filter(s=>s.responses&&Object.keys(s.responses).length>0);
@@ -1255,35 +1310,160 @@
   }
 
   /* ---------- 匯出 ---------- */
-  function download(filename,rows){
-    const csv=rows.map(r=>r.map(c=>{ const s=String(c??""); return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s; }).join(",")).join("\r\n");
-    const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"}); const url=URL.createObjectURL(blob);
-    const a=document.createElement("a"); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-  }
-  function exportDetail(){
-    const list=activeAll(); if(list.length===0){ alert("名單是空的。"); return; }
-    const rows=[["序號","姓名","座號","年級","家長信箱1","家長信箱2","家長備註","日期","星期","場次","地點","其他意見"]];
-    list.forEach(s=>{ let first=true;
-      Object.entries(s.responses||{}).forEach(([k,v])=>{ if(v!=="yes")return; const [date,sess]=k.split("_"); const dt=new Date(date+"T00:00:00");
-        rows.push([s.order,s.name,s.seat,s.grade,s.parentEmail||"",s.parentEmail2||"",s.parentNote||"",date,WD[dt.getDay()],SESS_LABEL[sess],venueOfKey(k),first?(s.comment||""):""]); first=false; }); });
-    download(`龍門暑訓出席_明細_${stamp()}.csv`,rows);
-  }
-  function exportMonthly(){
-    const list=activeAll(); if(list.length===0){ alert("名單是空的。"); return; }
-    const rows=[["序號","姓名","座號","年級","家長信箱1","家長信箱2","家長備註","七月場次","八月場次","合計","龍門場次","永運場次"]];
-    list.forEach(s=>{ const t=tallyResponses(s.responses); rows.push([s.order,s.name,s.seat,s.grade,s.parentEmail||"",s.parentEmail2||"",s.parentNote||"",t.jul,t.aug,t.total,t.long,t.yong]); });
-    download(`龍門暑訓出席_個人月統計_${stamp()}.csv`,rows);
-  }
-  function exportSummary(){
-    const list=activeAll(); if(list.length===0){ alert("名單是空的。"); return; }
-    const tY={}; list.forEach(s=>Object.entries(s.responses||{}).forEach(([k,v])=>{ if(v==="yes")tY[k]=(tY[k]||0)+1; }));
-    const rows=[["日期","星期","場次","地點","出席人數"]];
-    MONTHS.forEach(({m})=>{ const total=daysIn(m); for(let d=1;d<=total;d++){ if(!isTrainingDay(m,d))continue;
-      const dk=dateKey(m,d), dow=new Date(YEAR,m,d).getDay();
-      ["am","pm"].forEach(sess=>{ const key=dk+"_"+sess; rows.push([dk,WD[dow],SESS_LABEL[sess],venueOfKey(key),tY[key]||0]); }); } });
-    download(`龍門暑訓出席_每日彙總_${stamp()}.csv`,rows);
-  }
   function stamp(){ const d=new Date(); return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}`; }
+
+  // 動態載入 SheetJS（產生 .xlsx）
+  let _xlsxLib=null;
+  async function ensureXLSX(){
+    if(_xlsxLib) return _xlsxLib;
+    _xlsxLib=await import("https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs");
+    return _xlsxLib;
+  }
+  function saveXlsx(wb, filename){
+    return ensureXLSX().then(XLSX=>{ XLSX.writeFile(wb, filename); });
+  }
+
+  // 1) 月曆版（列印 / PDF）
+  function exportCalendar(){
+    const list=activeAll(); if(list.length===0){ alert("名單是空的。"); return; }
+    const tally={};
+    list.forEach(s=>Object.entries(s.responses||{}).forEach(([k,v])=>{ if(v==="yes")tally[k]=(tally[k]||0)+1; }));
+    function monthBlock(m,label){
+      let cells="";
+      const first=new Date(YEAR,m,1).getDay();
+      for(let i=0;i<first;i++) cells+=`<td class="empty"></td>`;
+      const total=daysIn(m); let col=first;
+      for(let d=1;d<=total;d++){
+        const dow=new Date(YEAR,m,d).getDay(), dk=dateKey(m,d);
+        let inner="";
+        if(isSchoolStart(m,d)) inner=`<div class="dn">${d}</div><div class="rt">開學</div>`;
+        else if(dow===0) inner=`<div class="dn">${d}</div><div class="rt">休息</div>`;
+        else{
+          const am=tally[dk+"_am"]||0, pm=tally[dk+"_pm"]||0;
+          const va=venueOfKey(dk+"_am"), vp=venueOfKey(dk+"_pm");
+          inner=`<div class="dn">${d}</div>
+            <div class="mk"><span class="v ${venueClass(va)}">晨</span>${am}</div>
+            <div class="mk"><span class="v ${venueClass(vp)}">午</span>${pm}</div>`;
+        }
+        cells+=`<td>${inner}</td>`; col++; if(col%7===0) cells+=`</tr><tr>`;
+      }
+      return `<h2>${label} ${YEAR}</h2><table class="cal"><thead><tr>${DOW.map(x=>`<th>${x}</th>`).join("")}</tr></thead><tbody><tr>${cells}</tr></tbody></table>`;
+    }
+    const w=window.open("","_blank");
+    if(!w){ alert("瀏覽器擋住了列印視窗，請允許彈出視窗後再試。"); return; }
+    w.document.write(`<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="UTF-8"><title>龍門暑訓出席月曆</title>
+      <style>*{margin:0;padding:0;box-sizing:border-box}
+      body{font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;color:#0a2228;padding:24px;line-height:1.4}
+      h1{font-size:20px;color:#0a4f5e;margin-bottom:4px}.sub{font-size:12px;color:#3c6068;margin-bottom:16px}
+      h2{font-size:15px;color:#0a4f5e;margin:18px 0 6px;border-bottom:1.5px solid #cfe6e9;padding-bottom:4px}
+      table.cal{width:100%;border-collapse:collapse;table-layout:fixed;margin-bottom:10px}
+      .cal th{font-size:11px;color:#3c6068;padding:4px;border:1px solid #e0eef0;background:#f4fafb}
+      .cal td{border:1px solid #e0eef0;vertical-align:top;height:64px;padding:3px;font-size:11px}
+      .cal td.empty{background:#fafdfd;border:none}
+      .dn{font-weight:700;font-size:12px;margin-bottom:2px}
+      .mk{font-size:11px;font-weight:700;color:#0a4f5e;display:flex;align-items:center;gap:4px;margin-top:1px}
+      .mk .v{font-size:9px;font-weight:700;padding:0 4px;border-radius:3px;color:#fff}
+      .v.vl{background:#2f6fb0}.v.vy{background:#e0764f}
+      .rt{color:#aab;font-size:10px;font-weight:700;margin-top:8px}
+      .legend{font-size:11px;color:#3c6068;margin:6px 0 0}
+      .pbtn{margin:14px 0;padding:10px 22px;font-size:14px;font-weight:700;background:#0a4f5e;color:#fff;border:none;border-radius:10px;cursor:pointer}
+      @media print{body{padding:0}.noprint{display:none}}</style></head><body>
+      <button class="pbtn noprint" onclick="window.print()">🖨️ 列印 / 另存為 PDF</button>
+      <h1>2026 龍門泳隊暑期訓練 · 出席月曆</h1>
+      <div class="sub">每格數字為「會出席」人數；晨＝晨訓、午＝午訓；<span style="color:#2f6fb0">藍</span>＝龍門、<span style="color:#e0764f">橘</span>＝永運。</div>
+      ${monthBlock(6,"七月")}${monthBlock(7,"八月")}
+      <script>window.onload=function(){setTimeout(function(){window.print();},400);};<\/script></body></html>`);
+    w.document.close();
+  }
+
+  // 2) 匯總版 Excel（一人一列、橫向每天每場次）
+  async function exportGrid(){
+    const list=activeAll(); if(list.length===0){ alert("名單是空的。"); return; }
+    const XLSX=await ensureXLSX();
+    // 欄位：基本資料 + 每個訓練日的 晨/午
+    const days=[];
+    MONTHS.forEach(({m})=>{ const total=daysIn(m); for(let d=1;d<=total;d++){ if(!isTrainingDay(m,d))continue; days.push([m,d]); } });
+    // 表頭兩列：第一列日期(跨晨午合併概念，這裡用文字)、第二列 晨/午
+    const head1=["序號","姓名","年級","班級","座號","家長信箱1","家長信箱2","七月","八月","合計"];
+    const head2=["","","","","","","","","",""];
+    days.forEach(([m,d])=>{ const dow=new Date(YEAR,m,d).getDay();
+      head1.push(`${m+1}/${d}(${DOW[dow]})`,""); head2.push("晨","午"); });
+    head1.push("其他意見"); head2.push("");
+    const aoa=[head1,head2];
+    list.forEach(s=>{
+      const t=tallyResponses(s.responses);
+      const row=[s.order,s.name,s.grade,s.cls,s.seat,s.parentEmail||"",s.parentEmail2||"",t.jul,t.aug,t.total];
+      days.forEach(([m,d])=>{ const dk=dateKey(m,d);
+        row.push(s.responses&&s.responses[dk+"_am"]==="yes"?"✓":"",
+                 s.responses&&s.responses[dk+"_pm"]==="yes"?"✓":""); });
+      row.push(s.comment||"");
+      aoa.push(row);
+    });
+    const ws=XLSX.utils.aoa_to_sheet(aoa);
+    // 合併日期表頭（每個日期跨兩欄）
+    const merges=[];
+    let c=10; // 第一個日期欄(0-based)：序號..合計共10欄 → index 10
+    days.forEach(()=>{ merges.push({s:{r:0,c},e:{r:0,c:c+1}}); c+=2; });
+    // 基本欄位上下兩列合併
+    [0,1,2,3,4,5,6,7,8,9].forEach(ci=>merges.push({s:{r:0,c:ci},e:{r:1,c:ci}}));
+    merges.push({s:{r:0,c},e:{r:1,c}}); // 其他意見
+    ws["!merges"]=merges;
+    ws["!views"]=[{state:"frozen",xSplit:2,ySplit:2}]; // 凍結前兩欄與表頭兩列
+    ws["!cols"]=[{wch:5},{wch:9},{wch:7},{wch:6},{wch:5},{wch:22},{wch:22},{wch:5},{wch:5},{wch:6},
+      ...days.flatMap(()=>[{wch:4},{wch:4}]),{wch:30}];
+    ws["!autofilter"]={ref:XLSX.utils.encode_range({s:{r:1,c:0},e:{r:aoa.length-1,c:head1.length-1}})};
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,"暑期出席匯總");
+    XLSX.writeFile(wb,`龍門暑訓出席_匯總_${stamp()}.xlsx`);
+  }
+
+  // 3) 個人月統計 Excel
+  async function exportMonthly(){
+    const list=activeAll(); if(list.length===0){ alert("名單是空的。"); return; }
+    const XLSX=await ensureXLSX();
+    const aoa=[["序號","姓名","年級","班級","座號","家長信箱1","家長信箱2","七月場次","八月場次","合計","龍門場次","永運場次","其他意見"]];
+    list.forEach(s=>{ const t=tallyResponses(s.responses);
+      aoa.push([s.order,s.name,s.grade,s.cls,s.seat,s.parentEmail||"",s.parentEmail2||"",t.jul,t.aug,t.total,t.long,t.yong,s.comment||""]); });
+    const ws=XLSX.utils.aoa_to_sheet(aoa);
+    ws["!cols"]=[{wch:5},{wch:9},{wch:7},{wch:6},{wch:5},{wch:22},{wch:22},{wch:9},{wch:9},{wch:7},{wch:9},{wch:9},{wch:30}];
+    ws["!views"]=[{state:"frozen",xSplit:2,ySplit:1}];
+    ws["!autofilter"]={ref:XLSX.utils.encode_range({s:{r:0,c:0},e:{r:aoa.length-1,c:12}})};
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,"個人月統計");
+    XLSX.writeFile(wb,`龍門暑訓出席_個人月統計_${stamp()}.xlsx`);
+  }
+
+  /* ---------- 快速查詢 ---------- */
+  function renderQueryPerson(){
+    const sel=$("qPersonSel"); const list=activeAll();
+    sel.innerHTML=`<option value="">— 請選擇 —</option>`+list.map(s=>`<option value="${s.id}">${esc(s.name)}（${studentMeta(s)}）</option>`).join("");
+    $("qPersonResult").innerHTML="";
+  }
+  function showPersonResult(id){
+    const s=activeAll().find(x=>x.id===id); const el=$("qPersonResult");
+    if(!s){ el.innerHTML=""; return; }
+    const resp=s.responses||{};
+    const keys=Object.keys(resp).filter(k=>resp[k]==="yes").sort();
+    if(keys.length===0){ el.innerHTML=`<div class="q-empty">${esc(s.name)} 暑期沒有勾選任何出席場次。</div>`; return; }
+    const t=tallyResponses(resp);
+    let rows="";
+    keys.forEach(k=>{ const [date,sess]=k.split("_"); const dt=new Date(date+"T00:00:00");
+      rows+=`<tr><td class="d">${date.slice(5).replace("-","/")}</td><td>${WD[dt.getDay()]}</td><td>${SESS_LABEL[sess]}</td><td><span class="vbadge ${venueClass(venueOfKey(k))}">${venueOfKey(k)}</span></td></tr>`; });
+    el.innerHTML=`<div class="note" style="margin-bottom:10px">${esc(s.name)}：七月 <b>${t.jul}</b> 場、八月 <b>${t.aug}</b> 場，共 <b>${t.total}</b> 場（龍門 ${t.long}、永運 ${t.yong}）</div>
+      <div class="daily"><table><thead><tr><th class="d">日期</th><th>星期</th><th>場次</th><th>地點</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
+  function showDayResult(){
+    const date=$("qDayDate").value, sess=$("qDaySess").value;
+    const el=$("qDayResult");
+    if(!date){ el.innerHTML=`<div class="q-empty">請先選擇日期。</div>`; return; }
+    const p=date.split("-"); const m=+p[1]-1, d=+p[2];
+    if(!isTrainingDay(m,d)){ el.innerHTML=`<div class="q-empty">這天沒有訓練（休息日或開學日）。</div>`; return; }
+    const key=date+"_"+sess;
+    const names=activeAll().filter(s=>s.responses&&s.responses[key]==="yes").map(s=>s.name);
+    const v=venueOfKey(key);
+    el.innerHTML=`<div class="q-sess-block"><div class="q-sess-h">${date.slice(5).replace("-","/")} ${SESS_LABEL[sess]} <span class="vbadge ${venueClass(v)}">${v}</span> <span class="q-cnt">${names.length} 人</span></div>`+
+      (names.length? `<div class="q-namelist">${names.map(n=>`<span class="q-name">${esc(n)}</span>`).join("")}</div>` : `<div class="q-empty">這個場次目前沒有人勾選出席。</div>`)+`</div>`;
+  }
 
   /* ════════════════ 學期版 ════════════════ */
   function semVenueOf(dow,sess){
@@ -1570,9 +1750,15 @@
   $("reloadRosterBtn").addEventListener("click",async()=>{ await loadAllStudents(); renderBindUI(); renderSummary(); });
   $("addViewerBtn").addEventListener("click",addViewer);
   $("seedViewerBtn").addEventListener("click",seedViewers);
-  $("exportBtn").addEventListener("click",exportDetail);
+  $("exportCalBtn").addEventListener("click",exportCalendar);
+  $("exportGridBtn").addEventListener("click",exportGrid);
   $("exportMonthBtn").addEventListener("click",exportMonthly);
-  $("exportSumBtn").addEventListener("click",exportSummary);
+  // 快速查詢
+  $("qTabPerson").addEventListener("click",()=>{ $("qTabPerson").classList.add("active"); $("qTabDay").classList.remove("active"); $("qPerson").style.display="block"; $("qDay").style.display="none"; });
+  $("qTabDay").addEventListener("click",()=>{ $("qTabDay").classList.add("active"); $("qTabPerson").classList.remove("active"); $("qDay").style.display="block"; $("qPerson").style.display="none"; });
+  $("qPersonSel").addEventListener("change",e=>showPersonResult(e.target.value));
+  $("qDayDate").addEventListener("change",showDayResult);
+  $("qDaySess").addEventListener("change",showDayResult);
   // 學期事件
   $("semSaveSetup").addEventListener("click",saveSemSetup);
   $("semSubmitBtn").addEventListener("click",semSubmit);
